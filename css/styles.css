@@ -1,0 +1,32 @@
+
+.keyboard {
+    display: grid;
+    grid-template-rows: 1fr 1fr 1fr;
+}
+
+button {
+    width: 30px;
+    height: 60px;
+    font-size: 10px;
+    margin: 10px;
+}
+
+.keyboard-letter-not-present {
+    background-color: gray;
+    color: white;
+}
+
+.keyboard-letter-somewhere-else {
+    background-color: yellow;
+    color: white;
+}
+
+.keyboard-letter-correct {
+    background-color: green;
+    color: white;
+}
+
+.keyboard-letter-not-selected {
+    background-color: lightgray;
+    color: black;
+}

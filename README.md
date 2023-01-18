@@ -1,4 +1,4 @@
-# wordle-projec
+# wordle-project
 Project submission for General Assembly Software Engineering Immersive
 
 ## List of planned features
