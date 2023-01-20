@@ -5,6 +5,12 @@
 // 'not-present' (letter not present anywhere in word) (dark grey)
 // 'not selected' (user hasnt selected it yet) (light grey)
 
+// TODO - next tasks
+// get colours working on keyboard as well
+// get colours resetting properly between games
+// add support for keyboard letter entry
+
+
 // TODO - note that the keyboard and guess tile colours arent always the same as we could have selected one letter correclty 
 // but theres a second one that hasnt been selected -> need to keep these as independent from one another 
 // should each guess tile be an object so we can store yellow green grey etc for each one
@@ -54,12 +60,12 @@ function startNewSession() {
         if (letter.dataset.status === 'letter-not-present') {
             alert("Invalid - we already know that letter isnt present!") // TODO - fix this - this is OK as long as letter hasnt been found to not exist 
         } else if (letterCount < maxLetters) {
-            guessTiles[`row${guessRow}`][letterCount].innerHTML = letter.innerHTML; 
+            guessTiles[`row${guessRow}`][letterCount].innerText = letter.innerText; 
             letter.dataset.status = 'selected' // TODO - decide is it worth using data attributes for this problem?
             letterCount++;
-            answerString[`guess${guessRow}`].push(letter.innerHTML)
-            event.target.classList.remove('letter-not-selected')
-            event.target.classList.add('letter-correct')
+            answerString[`guess${guessRow}`].push(letter.innerText)
+            // event.target.classList.remove('letter-not-selected') - TODO - letter can stay same colour, or should it change when selected, prior to submitting answer?
+            // event.target.classList.add('letter-correct')
         } else {
             alert("Too many letters!")
         }
@@ -83,8 +89,12 @@ function startNewSession() {
     }
 
     function deleteLetter() {
-        answerString.pop();
-        letterCount --
+        if (letterCount > 0) {
+            letterCount --
+            guessTiles[`row${guessRow}`][letterCount].innerText = " "; 
+            answerString[`guess${guessRow}`].pop();
+            // TODO do some testing on this code, sometimes doesnt seem to delete properly (bug hard to reproduce)
+        }
     }
 
     function submitGuess() {
@@ -93,15 +103,53 @@ function startNewSession() {
         } else {
             let currentGuess = answerString[`guess${guessRow}`].join("")
             console.log(`You submitted the following guess: ${currentGuess} `)
-            if (currentGuess === mysteryWord) {
+            if (!validWords.includes(currentGuess)) {
+                alert("Invalid word!")
+            } else if (currentGuess === mysteryWord) {
                 winGame() // TODO - should we also update the keyboard and guess tiles??
-            } else {
-                for (let key of keys) {
-                    if (answerString[`guess${guessRow}`].includes(key.innerHTML)) {
-                        key.classList.remove('letter-correct')
-                        key.classList.add('letter-not-present')
-                        // TODO - add logic here
+            } else { // if word not right, loop through tiles and letters and update colours accordingly
+                // TODO - find the four types of letters, maybe push them to an array and then update the classes accordingly
+                // but is this inefficient if we keep adding them each time someone guesses? 
+                for (let i = 0; i < maxLetters; i++) {
+                    // console.log('i: ', i)
+                    // console.log('mys i', mysteryWord[i], 'guess i', currentGuess[i])
+                    if (mysteryWord[i] === currentGuess[i]) {
+                         // TODO should we have a method / function for this looping through tiles stuff? have repeated this code a couple times 
+                         
+                        guessTiles[`row${guessRow}`].forEach(function(x) {
+                            //console.log('hi');
+                            (x.innerText === currentGuess[i]) && x.classList.add('tile-correct');
+                        })
+                        keys.forEach(function(x) {
+                            (x.innerText === currentGuess[i]) && (x.classList = 'key letter-correct')
+                        })
+                    // TODO can we combine these two loops together ? combine functions? or name them and just call them once
+                    // TODO or would assinging id to each letter make it easier/faster so we dont have to loop through? 
+                    } else if (mysteryWord.includes(currentGuess[i])) {
+                        guessTiles[`row${guessRow}`].forEach(function(x) {// TODO should we put into Array at the beginning?
+                            (x.innerText === currentGuess[i]) && x.classList.add('tile-somewhere-else')
+                            //console.log('x: ', x)
+                        })
+                        keys.forEach(function(x) {
+                            (x.innerText === currentGuess[i]) && (x.classList = 'key letter-somewhere-else')
+                        })
+                    } else {
+                        guessTiles[`row${guessRow}`].forEach(function(x) {// TODO should we put into Array at the beginning?
+                            (x.innerText === currentGuess[i]) && x.classList.add('tile-not-present')
+                            //console.log('x: ', x)
+                        })
+                        keys.forEach(function(x) {
+                            (x.innerText === currentGuess[i]) && (x.classList = 'key letter-not-present')
+                        })
                     }
+                    // } else {
+                    //     for (let key of keys) {
+                    //         if (answerString[`guess${guessRow}`].includes(key.innerText)) {
+                    //             key.classList = ""
+                    //             key.classList.add('key','letter-not-present')
+                    //             // TODO - add logic here
+                    //         }
+                // If user hasnt run out of guesses, give them another guess. Otherwise, end the game. 
                 }
                 (guessRow < 5)? getNextGuess() : loseGame()
             }
@@ -111,11 +159,15 @@ function startNewSession() {
     function loseGame() {
         // TODO  
         alert("You lose!")
+        // TODO - show a button for user to click new game, that way they can see the board before it refreshes
+        newGame()
     }
     
     function winGame() {
         // TODO  
         alert("You win!")
+        // TODO - show a button for user to click new game, that way they can see the board before it refreshes
+        newGame()
     }
    
     function getNewWord() {
@@ -127,10 +179,22 @@ function startNewSession() {
     
     function newGame() {
         // Reset guess count
-        let guessCount = 0;
-        let mysteryWord = ""
-        getNewWord()
         // TODO - Reset keyboard and game tiles 
+        for (let key of keys) {
+            key.classList = ''
+            key.classList.add('key','letter-not-selected') 
+        }
+        for (let row in guessTiles) {
+            for (let tile of guessTiles[row]) {
+                tile.innerText = " ";
+            }
+        }
+        guessRow = 0;
+        letterCount = 0;
+        getNewWord()
+        for (let guess in answerString) {
+            answerString[guess] = []
+        }
     }
 }
 

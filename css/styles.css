@@ -1,33 +1,64 @@
-
-.guessboard{
+header {
+    color: blue;
+    text-align: center;
+    font-size: larger;
+}
+.guess-board{
     display: grid;
     grid-template-rows: 1fr 1fr 1fr 1fr 1fr 1fr;
+    justify-items: center;
+    margin: 0px;
+    row-gap: 3px;
 }
 
 .guess-tile {
     width: 40px;
-    height: 60px;
-    background-color: yellow;
+    height: 40px;
+    background-color: lightblue;
     border: 1px solid black;
     display: inline-block;
     text-align: center;
+    vertical-align: top;
+    padding-top: 10px;
+    font-size: 24px;
 }
+
+.tile-correct {
+    background-color: green;
+}
+
+.tile-somewhere-else {
+    background-color: yellow;
+}
+
+.tile-not-present {
+    background-color: black;
+    color: white;
+}
+
+.tile-not-selected {
+    background-color: lightblue;
+}
+
 
 .keyboard {
     display: grid;
     grid-template-rows: 1fr 1fr 1fr;
+    justify-items: center;
+    margin-top: 10px;
 }
 
 button {
     width: 30px;
     height: 60px;
     font-size: 10px;
-    margin: 10px;
+    margin: 3px;
 }
 
 
 .delete-key, .enter-key {
-    width: 100px;
+    width: 70px;
+    background-color: lightgray;
 }
 
 .letter-not-present {
@@ -37,7 +68,7 @@ button {
 
 .letter-somewhere-else {
     background-color: yellow;
-    color: white;
+    color: black;
 }
 
 .letter-correct {
