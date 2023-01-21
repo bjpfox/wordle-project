@@ -6,9 +6,9 @@
 // 'not selected' (user hasnt selected it yet) (light grey)
 
 // TODO - main tasks
-// get colours working on keyboard as well
-// get colours resetting properly between games
-// add support for keyboard letter entry
+// get colours working on keyboard as well - DONE
+// add support for keyboard letter entry - DONE
+// get colours resetting properly between games - DONE  
 
 
 // TODO - note that the keyboard and guess tile colours arent always the same as we could have selected one letter correclty 
@@ -51,26 +51,57 @@ function startNewSession() {
         guess5: [],
     }
 
-// Set up event listeners
+
+// Set up event listener for pressing buttons on keyboard
+document.body.addEventListener('keydown', function(event) {
+    // TODO 
+    addLetter(event)
+
+})
+
+// Set up event listeners to enable clicking on the keys
     const keys = document.querySelectorAll('.key')
     for (let key of keys) {
         key.addEventListener('click', addLetter)
     }
     function addLetter(event){
-        const letter = event.target;
-        if (letter.dataset.status === 'letter-not-present') {
-            alert("Invalid - we already know that letter isnt present!") // TODO - wordle actually allows this, but maybe could use this as a hint 
-        } else if (letterCount < maxLetters) {
-            guessTiles[`row${guessRow}`][letterCount].innerText = letter.innerText; 
-            letter.dataset.status = 'selected' // TODO - decide is it worth using data attributes for this problem?
+        let letter = ""
+        let isLetter = true;
+        if (event.type === 'click') {
+            console.log("You clicked")
+            letter = event.target.innerText;
+        } else if (event.type === 'keydown') {
+            letter = event.key.toUpperCase();
+            console.log("You pressed this key: ", letter)
+            if ((letter === 'BACKSPACE')) {
+                isLetter = false;
+                deleteLetter();
+            } else if (letter === 'ENTER') {
+                isLetter = false;
+                submitGuess()
+            }
+        } 
+
+        //if (letter.dataset.status === 'letter-not-present') {
+        //    alert("Invalid - we already know that letter isnt present!") // TODO - wordle actually allows this, but maybe could use this as a hint 
+        // } else 
+        if (letterCount >= maxLetters) {
+            alert("Too many letters!");
+        } else if (isLetter) {
+            guessTiles[`row${guessRow}`][letterCount].innerText = letter; 
+            // letter.dataset.status = 'selected' // TODO - decide is it worth using data attributes for this problem?
             letterCount++;
-            answerString[`guess${guessRow}`].push(letter.innerText)
+            answerString[`guess${guessRow}`].push(letter)
             // event.target.classList.remove('letter-not-selected') - TODO - letter can stay same colour, or should it change to some other colour when selected, prior to submitting answer? 
             // event.target.classList.add('letter-correct')
-        } else {
-            alert("Too many letters!")
-        }
+        } 
     }
+    
+        // check for enter or delete here
+        // and do we need to break or does below still make sense? maybe run below only on click, put keydown code below that as an else
+        // TODO - maybe rename this function processLetter or something and have it also run the delete/enter key scenarios on click, 
+        // that way code is a bit more consistent and function name says what it does
+
    
     const deleteKey = document.querySelector('.delete-key')
     deleteKey.addEventListener('click', deleteLetter)
@@ -149,6 +180,7 @@ function startNewSession() {
                                     (x.innerText === mysteryWord[i]) && (!(x.classList.contains('letter-correct'))) && (x.classList = 'key letter-somewhere-else')
                                 }) 
                                 // set i-th letter on guess tile to yellow, and the equivalent key to yellow , if not already green
+                                // TODO maybe use id letters instead of looping through all keys 
                             }
                         } 
                     }
@@ -244,6 +276,7 @@ function startNewSession() {
         for (let row in guessTiles) {
             for (let tile of guessTiles[row]) {
                 tile.innerText = " ";
+                tile.classList = 'guess-tile'
             }
         }
         guessRow = 0;
