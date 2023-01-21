@@ -13,6 +13,8 @@ Possible ideas for extensions:
 1. A version of wordle where you can customise your word length and maybe your allowed number of guesses (maybe it makes a suggestion as to how many guesses) - would need a bigger dictionary of words 
 1. Session storage - to be investigated
 1. Some kind of system for giving hints? (e.g. remove some letters that arent in it) Maybe in exchange for points?
+1. Introduce a points system e.g. if correctly guess word with 3 guesses left you get 3 points, etc
+1. Use CSS animations e.g. when letter changes colour
 1. To be developed
 
 

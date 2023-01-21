@@ -32,7 +32,7 @@ header {
 }
 
 .tile-not-present {
-    background-color: black;
+    background-color: grey;
     color: white;
 }
 
