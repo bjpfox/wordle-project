@@ -10,8 +10,12 @@
 // add support for keyboard letter entry - DONE
 // get colours resetting properly between games - DONE  
 // win and lose should happen after the keys have changed - DONE 
-// lose should display the mystery word somewhere - TODO 
+// lose should display the mystery word somewhere - DONE 
 // add scoreboard to track win/loss %, winning streak, etc 
+// add a play again button
+
+
+// TODO tidy up use of classes and IDs, try and be more consistent 
 
 
 
@@ -62,6 +66,12 @@ function startNewSession() {
     document.body.addEventListener('keydown', function(event) {
         // TODO 
         addLetter(event)
+    })
+
+    // Set up event listener for new game
+    const newGameButton = document.querySelector('.new-game')
+    newGameButton.addEventListener('click', function(event) {
+        newGame()
     })
 
     // Set up event listeners to enable clicking on the keys
@@ -251,18 +261,22 @@ function startNewSession() {
     function loseGame() {
         // TODO  
         statusBar.innerText = `Mystery word: ${mysteryWord}`
-        let playAgain = prompt("You lose! Play again? y/n: ")
-        // TODO - show a button for user to click new game, that way they can see the board before it refreshes
-        if (playAgain.toLowerCase() === 'y') {
-            newGame()
-        }
+        newGameButton.style.display = 'inline'
+        // newGame()
+        
+        // let playAgain = prompt("You lose! Play again? y/n: ")
+        // if (playAgain.toLowerCase() === 'y') {
+        //     newGame()
+        // }
     }
     
     function winGame() {
         // TODO  
-        alert("You win!")
+        // alert("You win!")
+        statusBar.innerText = `You WIN!`
+        newGameButton.style.display = 'inline'
         // TODO - show a button for user to click new game, that way they can see the board before it refreshes
-        newGame()
+        // newGame()
     }
    
     function getNewWord() {
@@ -275,6 +289,7 @@ function startNewSession() {
     function newGame() {
         // Reset guess count
         // TODO - Reset keyboard and game tiles 
+        newGameButton.style.display = 'none' // TODO - currently this means players have to wait til end of game - should players be able to reset in middle of game? 
         statusBar.innerText = ""
         for (let key of keys) {
             key.classList = ''
