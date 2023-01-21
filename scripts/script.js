@@ -9,8 +9,9 @@
 // get colours working on keyboard as well - DONE
 // add support for keyboard letter entry - DONE
 // get colours resetting properly between games - DONE  
-// win and lose should happen after the keys have changed - TODO 
-// lose should display the myster word somewhere - TODO 
+// win and lose should happen after the keys have changed - DONE 
+// lose should display the mystery word somewhere - TODO 
+// add scoreboard to track win/loss %, winning streak, etc 
 
 
 
@@ -53,16 +54,17 @@ function startNewSession() {
         guess4: [],
         guess5: [],
     }
+    
+    // Set up status bar
+    const statusBar = document.querySelector('#status-bar')
 
+    // Set up event listener for pressing buttons on keyboard
+    document.body.addEventListener('keydown', function(event) {
+        // TODO 
+        addLetter(event)
+    })
 
-// Set up event listener for pressing buttons on keyboard
-document.body.addEventListener('keydown', function(event) {
-    // TODO 
-    addLetter(event)
-
-})
-
-// Set up event listeners to enable clicking on the keys
+    // Set up event listeners to enable clicking on the keys
     const keys = document.querySelectorAll('.key')
     for (let key of keys) {
         key.addEventListener('click', addLetter)
@@ -248,6 +250,7 @@ document.body.addEventListener('keydown', function(event) {
 
     function loseGame() {
         // TODO  
+        statusBar.innerText = `Mystery word: ${mysteryWord}`
         let playAgain = prompt("You lose! Play again? y/n: ")
         // TODO - show a button for user to click new game, that way they can see the board before it refreshes
         if (playAgain.toLowerCase() === 'y') {
@@ -272,6 +275,7 @@ document.body.addEventListener('keydown', function(event) {
     function newGame() {
         // Reset guess count
         // TODO - Reset keyboard and game tiles 
+        statusBar.innerText = ""
         for (let key of keys) {
             key.classList = ''
             key.classList.add('key','letter-not-selected') 

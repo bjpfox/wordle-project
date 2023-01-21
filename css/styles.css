@@ -1,3 +1,7 @@
+body {
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+
 header {
     color: blue;
     text-align: center;
@@ -8,7 +12,7 @@ header {
     grid-template-rows: 1fr 1fr 1fr 1fr 1fr 1fr;
     justify-items: center;
     margin: 0px;
-    row-gap: 3px;
+    row-gap: 4px;
 }
 
 .guess-tile {
@@ -79,4 +83,11 @@ button {
 .letter-not-selected {
     background-color: lightgray;
     color: black;
+}
+
+#status-bar {
+    color: black;
+    font-size: larger;
+    text-align: center;
+    margin: 20px;
 }
