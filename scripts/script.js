@@ -9,6 +9,9 @@
 // get colours working on keyboard as well - DONE
 // add support for keyboard letter entry - DONE
 // get colours resetting properly between games - DONE  
+// win and lose should happen after the keys have changed - TODO 
+// lose should display the myster word somewhere - TODO 
+
 
 
 // TODO - note that the keyboard and guess tile colours arent always the same as we could have selected one letter correclty 
@@ -67,12 +70,13 @@ document.body.addEventListener('keydown', function(event) {
     function addLetter(event){
         let letter = ""
         let isLetter = true;
+
         if (event.type === 'click') {
-            console.log("You clicked")
+            // console.log("You clicked")
             letter = event.target.innerText;
         } else if (event.type === 'keydown') {
             letter = event.key.toUpperCase();
-            console.log("You pressed this key: ", letter)
+            // console.log("You pressed this key: ", letter)
             if ((letter === 'BACKSPACE')) {
                 isLetter = false;
                 deleteLetter();
@@ -85,9 +89,7 @@ document.body.addEventListener('keydown', function(event) {
         //if (letter.dataset.status === 'letter-not-present') {
         //    alert("Invalid - we already know that letter isnt present!") // TODO - wordle actually allows this, but maybe could use this as a hint 
         // } else 
-        if (letterCount >= maxLetters) {
-            alert("Too many letters!");
-        } else if (isLetter) {
+        if (isLetter && (letterCount < maxLetters)) {
             guessTiles[`row${guessRow}`][letterCount].innerText = letter; 
             // letter.dataset.status = 'selected' // TODO - decide is it worth using data attributes for this problem?
             letterCount++;
@@ -137,8 +139,6 @@ document.body.addEventListener('keydown', function(event) {
             console.log(`You submitted the following guess: ${currentGuess} `)
             if (!validWords.includes(currentGuess)) {
                 alert("Invalid word!")
-            } else if (currentGuess === mysteryWord) {
-                winGame() // TODO - should we also update the keyboard and guess tiles??
             } else { // if word not right, loop through tiles and letters and update colours accordingly
                 // TODO - find the four types of letters, maybe push them to an array and then update the classes accordingly
                 // but is this inefficient if we keep adding them each time someone guesses? 
@@ -240,16 +240,19 @@ document.body.addEventListener('keydown', function(event) {
                     //             // TODO - add logic here
                     //         }
                 // If user hasnt run out of guesses, give them another guess. Otherwise, end the game. 
-                (guessRow < 5)? getNextGuess() : loseGame()
+                (currentGuess === mysteryWord) ? setTimeout(winGame, 1) : 
+                (guessRow < 5) ? getNextGuess() : setTimeout(loseGame, 1)
             }
         }
     }
 
     function loseGame() {
         // TODO  
-        alert("You lose!")
+        let playAgain = prompt("You lose! Play again? y/n: ")
         // TODO - show a button for user to click new game, that way they can see the board before it refreshes
-        newGame()
+        if (playAgain.toLowerCase() === 'y') {
+            newGame()
+        }
     }
     
     function winGame() {
