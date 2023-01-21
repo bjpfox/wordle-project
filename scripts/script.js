@@ -11,12 +11,15 @@
 // get colours resetting properly between games - DONE  
 // win and lose should happen after the keys have changed - DONE 
 // lose should display the mystery word somewhere - DONE 
-// add scoreboard to track win/loss %, winning streak, etc 
-// add a play again button
+// add a play again button - DONE
+// add basic scoreboard to track win/loss %, winning streak, - DONE 
+
+// then start adding some extra functionality e.g. session storage, hints, points, css animations, etc
+// maybe a better way of displaying stats, e.g. a container div that pops up
 
 
 // TODO tidy up use of classes and IDs, try and be more consistent 
-
+// TODO small bug - if game has ended and user keeps clicking submit it will register more game losses... and the same for wins, so people can cheat! 
 
 
 // TODO - note that the keyboard and guess tile colours arent always the same as we could have selected one letter correclty 
@@ -30,7 +33,7 @@ function startNewSession() {
     let playerStats = {
         winCount: 0,
         lossCount: 0,
-        totalGamesPlayers: this.winCount + this.lossCount, // TODO - check is this valid?
+        winningStreak: 0,
     };
     const validWords2 = ['MEEDS', 'MESAS', 'MENSE'] // Used for testing, got bug when I tried MESAS, then MENSE (2nd letter changed from green to yellow even though it was correct) - update bug fixed
 
@@ -82,6 +85,7 @@ function startNewSession() {
     function addLetter(event){
         let letter = ""
         let isLetter = true;
+        statusBar.innerText = ""
 
         if (event.type === 'click') {
             // console.log("You clicked")
@@ -135,6 +139,7 @@ function startNewSession() {
     }
 
     function deleteLetter() {
+        statusBar.innerText = ""
         if (letterCount > 0) {
             letterCount --
             guessTiles[`row${guessRow}`][letterCount].innerText = " "; 
@@ -144,13 +149,16 @@ function startNewSession() {
     }
 
     function submitGuess() {
+        statusBar.innerText = ""
         if (letterCount < 5) {
-            alert("Not enough letters!")
+            // alert("Not enough letters!")
+            statusBar.innerText = "Not enough letters!"
         } else {
             let currentGuess = answerString[`guess${guessRow}`].join("")
             console.log(`You submitted the following guess: ${currentGuess} `)
             if (!validWords.includes(currentGuess)) {
-                alert("Invalid word!")
+                statusBar.innerText = "Invalid word!"
+                // alert("Invalid word!")
             } else { // if word not right, loop through tiles and letters and update colours accordingly
                 // TODO - find the four types of letters, maybe push them to an array and then update the classes accordingly
                 // but is this inefficient if we keep adding them each time someone guesses? 
@@ -260,7 +268,12 @@ function startNewSession() {
 
     function loseGame() {
         // TODO  
-        statusBar.innerText = `Mystery word: ${mysteryWord}`
+        playerStats.lossCount ++
+        playerStats.winningStreak = 0 
+        statusBar.innerHTML = `Mystery word: ${mysteryWord}
+        <br>Wins: ${playerStats.winCount}
+        <br>Losses: ${playerStats.lossCount}
+        <br>Win streak: ${playerStats.winningStreak}`
         newGameButton.style.display = 'inline'
         // newGame()
         
@@ -273,7 +286,12 @@ function startNewSession() {
     function winGame() {
         // TODO  
         // alert("You win!")
-        statusBar.innerText = `You WIN!`
+        playerStats.winCount ++
+        playerStats.winningStreak ++ 
+        statusBar.innerHTML = `You WIN!
+        <br>Wins: ${playerStats.winCount}
+        <br>Losses: ${playerStats.lossCount}
+        <br>Win streak: ${playerStats.winningStreak}`
         newGameButton.style.display = 'inline'
         // TODO - show a button for user to click new game, that way they can see the board before it refreshes
         // newGame()
