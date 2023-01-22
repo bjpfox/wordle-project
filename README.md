@@ -9,13 +9,11 @@ The first version of the app will aim to replicate the same game play as [Wordle
 See structure of game below. 
 
 Once this is working, I plan to try implementing some extensions / modifications. 
-Possible ideas for extensions: 
-1. A version of wordle where you can customise your word length and maybe your allowed number of guesses (maybe it makes a suggestion as to how many guesses) - would need a bigger dictionary of words 
+Ideas for extensions: 
 1. Session storage - to be investigated
-1. Some kind of system for giving hints? (e.g. remove some letters that arent in it) Maybe in exchange for points?
 1. Introduce a points system e.g. if correctly guess word with 3 guesses left you get 3 points, etc
-1. Use CSS animations e.g. when letter changes colour
-1. To be developed
+1. Some kind of system for giving hints? (e.g. remove some letters that arent in it) Maybe in exchange for points?
+
 
 
 ## Structure of game
@@ -39,5 +37,13 @@ Possible ideas for extensions:
 5.  submitGuess() will update the keys to reflect the guess. if correct it will launch winGame(), if not it will launch getNextGuess() unless there are no more guesses, in which case it will launch loseGame()
 6. winGame() will display the win container and will update the score. container will have a play again button which will launch startNewGame().
 7. loseGame() will display the lose container and will update the score. container will have a play again button which will launch startNewGame().
-8. May should have letter processing function? Also need to handle delete and enter 
+8. Maybe should have letter processing function? Also need to handle delete and enter 
 
+## Technical aspects
+1. LocalStorage - TODO
+1. 
+
+## Future work
+Ideas for future work:
+1. A version of wordle where you can customise your word length and maybe your allowed number of guesses (maybe it makes a suggestion as to how many guesses) - would need a bigger dictionary of words 
+1. Use CSS animations e.g. when letter changes colour
