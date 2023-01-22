@@ -15,10 +15,11 @@
 // add basic scoreboard to track win/loss %, winning streak, - DONE 
 
 // then start adding some extra functionality e.g. session storage - DONE
-
-// handle non letter chars - dont display them in the field 
+// Reset stored game data should also reset the tiles and keys, shouldnt require reset - DONE  
+// handle non letter chars - dont display them in the field - DONE
 // Other ideas:
 // Minor: reset stats should update div instantly - DONE
+// show/hide game stats, help instructions, etc? 
 // countdown timer
 // keep track of points, 
 // hint system 
@@ -397,6 +398,7 @@ function startNewSession() {
         localStorage.removeItem('answerString')
         localStorage.removeItem('letterCount')
         localStorage.removeItem('guessRow')
+        newGame()
     }
 
     function resetStoredPlayerStats() {
