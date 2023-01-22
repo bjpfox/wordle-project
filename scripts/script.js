@@ -22,24 +22,29 @@
 // References used to learn about LocalStorage: https://www.digitalocean.com/community/tutorials/js-introduction-localstorage-sessionstorage
 
 // We want to store the following
-// playerstats
-// lettercount
-// guesscount
-// answerstring
+// playerstats - set DONE, get DONE
+// lettercount - set DONE 
+// guessRow - set DONE 
+// answerstring - set DONE,  
+// mysteryWord - set DONE, get TODO
 
 // question - when to update these? every time they change?
 // and how do we know to load? maybe onPageLoad event 
 // localStorage.setItem('playerStats', JSON.stringify(playerStats))
 // localStorage.setItem('answerString', JSON.stringify(answerString))
-// localStorage.setItem('guessCount', guessCount)
+// localStorage.setItem('guessRow', guessRow)
 // localStorage.setItem('letterCount', letterCount)
+// localStorage.setItem('mysteryWord', mysteryWord)
+
+// TODO add option to reset stats
 
 // We can get these back with
 // if (localStorage.length > 0) { // TODO - check does this work if some of these exist and others dont? maybe looping through is better.. 
 //     playerStats = JSON.parse(localStorage.getItem('playerStats'))
 //     answerString = JSON.parse(localStorage.getItem('answerString'))
-//     guessCount = localStorage.getItem('guessCount')
+//     guessRow = localStorage.getItem('guessRow')
 //     letterCount = localStorage.getItem('letterCount')
+//     mysteryWord = localStorage.getItem('mysteryWord')
 // } else {
 //     // load the page as normal
 // }
@@ -67,13 +72,31 @@ function startNewSession() {
         lossCount: 0,
         winningStreak: 0,
     };
+        
+    let letterCount = 0; // tracks what letter of the row we're on (resets after each new row)
+    let guessRow = 0; // tracks what guess row we're on
+
+    let mysteryWord = ""
+    
+    // TODO - consider if some of these variables can be scoped more locally
+    let answerString = {
+        guess0: [],
+        guess1: [],
+        guess2: [],
+        guess3: [],
+        guess4: [],
+        guess5: [],
+    }
+    let answerStringCache = ""
+    let storedLetter = ""
 
     if (localStorage.length > 0) { // TODO - check does this work if some of these exist and others dont? maybe looping through is better.. 
-        playerStats = JSON.parse(localStorage.getItem('playerStats'))
+        (localStorage.getItem('playerStats') !== null) && (playerStats = JSON.parse(localStorage.getItem('playerStats')));
         console.log(`player stats: ${JSON.stringify(playerStats)}`)
         // answerString = JSON.parse(localStorage.getItem('answerString'))
-        // guessCount = localStorage.getItem('guessCount')
+        // guessRow = localStorage.getItem('guessRow')
         // letterCount = localStorage.getItem('letterCount')
+        // mysteryWord = localStorage.getItem('mysteryWord')
     }
     const validWords2 = ['MEEDS', 'MESAS', 'MENSE'] // Used for testing, got bug when I tried MESAS, then MENSE (2nd letter changed from green to yellow even though it was correct) - update bug fixed
 
@@ -88,34 +111,23 @@ function startNewSession() {
     guessTiles.row3 = document.querySelector('.guess-3').querySelectorAll('.guess-tile')
     guessTiles.row4 = document.querySelector('.guess-4').querySelectorAll('.guess-tile')
     guessTiles.row5 = document.querySelector('.guess-5').querySelectorAll('.guess-tile')
-    
-    let letterCount = 0; // tracks what letter of the row we're on (resets after each new row)
-    let guessRow = 0; // tracks what guess row we're on
-    
-    // TODO - consider if some of these variables can be scoped more locally
-    let answerString = {
-        guess0: [],
-        guess1: [],
-        guess2: [],
-        guess3: [],
-        guess4: [],
-        guess5: [],
-    }
+
     
     // Set up status bar
     const statusBar = document.querySelector('#status-bar')
 
     // Set up event listener for pressing buttons on keyboard
-    document.body.addEventListener('keydown', function(event) {
-        // TODO 
-        addLetter(event)
-    })
-
+    document.body.addEventListener('keydown', addLetter) 
+    
     // Set up event listener for new game
     const newGameButton = document.querySelector('.new-game')
-    newGameButton.addEventListener('click', function(event) {
-        newGame()
-    })
+    newGameButton.addEventListener('click', newGame)
+
+    // Set up event listeners for stored data reset - used for testing - TODO - is this worth keeping for players? I think playerstats should be resetable, game data cant really be reset without messing up game and can be achieved by simply clicking new game
+    const resetGameData = document.querySelector('.reset-game-data')
+    resetGameData.addEventListener('click', resetStoredGameData)
+    const resetPlayerStats = document.querySelector('.reset-player-stats')
+    resetPlayerStats.addEventListener('click', resetStoredPlayerStats) 
 
     // Set up event listeners to enable clicking on the keys
     const keys = document.querySelectorAll('.key')
@@ -127,10 +139,10 @@ function startNewSession() {
         let isLetter = true;
         statusBar.innerText = ""
 
-        if (event.type === 'click') {
+        if ((event !== undefined) && (event.type === 'click')) {
             // console.log("You clicked")
             letter = event.target.innerText;
-        } else if (event.type === 'keydown') {
+        } else if ((event !== undefined) && (event.type === 'keydown')) {
             letter = event.key.toUpperCase();
             // console.log("You pressed this key: ", letter)
             if ((letter === 'BACKSPACE')) {
@@ -140,16 +152,23 @@ function startNewSession() {
                 isLetter = false;
                 submitGuess()
             }
+        } else {
+            letter = storedLetter;
         } 
 
         //if (letter.dataset.status === 'letter-not-present') {
         //    alert("Invalid - we already know that letter isnt present!") // TODO - wordle actually allows this, but maybe could use this as a hint 
         // } else 
         if (isLetter && (letterCount < maxLetters)) {
+            // console.log('rgR: ', `row${guessRow}`)
+            // console.log('lc: ', letterCount)
+            // console.log('g', guessRow)
             guessTiles[`row${guessRow}`][letterCount].innerText = letter; 
             // letter.dataset.status = 'selected' // TODO - decide is it worth using data attributes for this problem?
             letterCount++;
             answerString[`guess${guessRow}`].push(letter)
+            localStorage.setItem('answerString', JSON.stringify(answerString)) // TODO - more efficient way? e.g. just alter the letter that changed
+            localStorage.setItem('letterCount', letterCount)
             // event.target.classList.remove('letter-not-selected') - TODO - letter can stay same colour, or should it change to some other colour when selected, prior to submitting answer? 
             // event.target.classList.add('letter-correct')
         } 
@@ -176,6 +195,8 @@ function startNewSession() {
         // TODO - move to the next guess row 
         guessRow ++
         letterCount = 0
+        localStorage.setItem('letterCount', letterCount)
+        localStorage.setItem('guessRow', guessRow)
     }
 
     function deleteLetter() {
@@ -184,6 +205,8 @@ function startNewSession() {
             letterCount --
             guessTiles[`row${guessRow}`][letterCount].innerText = " "; 
             answerString[`guess${guessRow}`].pop();
+            localStorage.setItem('answerString', JSON.stringify(answerString)) // TODO - more efficient way? e.g. just alter the letter that changed
+            localStorage.setItem('letterCount', letterCount)
             // TODO do some testing on this code, sometimes doesnt seem to delete properly (bug hard to reproduce)
         }
     }
@@ -307,17 +330,21 @@ function startNewSession() {
     }
 
     function loseGame() {
-        // TODO  
         playerStats.lossCount ++
         playerStats.winningStreak = 0 
+        
+        // After each game, update stats in storage and remove the temp game storage data 
         localStorage.setItem('playerStats', JSON.stringify(playerStats))
+        localStorage.removeItem('mysteryWord')
+        localStorage.removeItem('answerString')
+        localStorage.removeItem('letterCount')
+        localStorage.removeItem('guessRow')
+        
         statusBar.innerHTML = `Mystery word: ${mysteryWord}
         <br>Wins: ${playerStats.winCount}
         <br>Losses: ${playerStats.lossCount}
         <br>Win streak: ${playerStats.winningStreak}`
         newGameButton.style.display = 'inline'
-        // newGame()
-        
         // let playAgain = prompt("You lose! Play again? y/n: ")
         // if (playAgain.toLowerCase() === 'y') {
         //     newGame()
@@ -325,30 +352,48 @@ function startNewSession() {
     }
     
     function winGame() {
-        // TODO  
         // alert("You win!")
         playerStats.winCount ++
-        playerStats.winningStreak ++ 
+        playerStats.winningStreak ++
+        
+        // After each game, update stats in storage and remove the temp game storage data 
         localStorage.setItem('playerStats', JSON.stringify(playerStats))
+        localStorage.removeItem('mysteryWord')
+        localStorage.removeItem('answerString')
+        localStorage.removeItem('letterCount')
+        localStorage.removeItem('guessRow')
+        
         statusBar.innerHTML = `You WIN!
         <br>Wins: ${playerStats.winCount}
         <br>Losses: ${playerStats.lossCount}
         <br>Win streak: ${playerStats.winningStreak}`
         newGameButton.style.display = 'inline'
-        // TODO - show a button for user to click new game, that way they can see the board before it refreshes
-        // newGame()
     }
    
     function getNewWord() {
         const wordIndex = Math.floor((Math.random())*(validWords.length))
         mysteryWord = validWords[wordIndex]
+        localStorage.setItem('mysteryWord', mysteryWord) 
         console.log('we picked the following word: ', mysteryWord)
     }
-    
+    function resetStoredGameData() {
+        localStorage.removeItem('mysteryWord')
+        localStorage.removeItem('answerString')
+        localStorage.removeItem('letterCount')
+        localStorage.removeItem('guessRow')
+    }
+
+    function resetStoredPlayerStats() {
+        localStorage.removeItem('playerStats')
+        playerStats = {
+            winCount: 0,
+            lossCount: 0,
+            winningStreak: 0,
+        };
+    }
     
     function newGame() {
         // Reset guess count
-        // TODO - Reset keyboard and game tiles 
         newGameButton.style.display = 'none' // TODO - currently this means players have to wait til end of game - should players be able to reset in middle of game? 
         statusBar.innerText = ""
         for (let key of keys) {
@@ -363,10 +408,53 @@ function startNewSession() {
         }
         guessRow = 0;
         letterCount = 0;
-        getNewWord()
-        for (let guess in answerString) {
-            answerString[guess] = []
+        
+        // Get the mystery word from local storage. If it doesnt exist, get a new word (mystery word is removed from storage after each game so if it exists that means a game was in progress)
+        // TODO write some notes in README.md on how local storage works (when you set, get, remove, etc and why)
+        mysteryWord = localStorage.getItem('mysteryWord');
+        (mysteryWord === null) && getNewWord()
+
+        // Get guessRow and letterCount from storage. If they dont exist, set them to zero (they only exist when a game is in progress) 
+        // guessRow = localStorage.getItem('guessRow');
+        // (guessRow === null) && (guessRow = 0)
+        
+        // TODO - decide if its worth retrieving partly entered words? 
+        // For now I think its OK to just retrieve submitted answers only
+        // letterCount = localStorage.getItem('letterCount');
+        // (letterCount === 'null') && (letterCount = 0)
+        letterCount = 0;
+        console.log(mysteryWord, guessRow, letterCount)
+       
+        // If answerString exists, a game was in progress so retrieve it from storage, and submit the previous answers. Else empty it. 
+        answerStringCache = localStorage.getItem('answerString'); //comment out when testing
+        if (answerStringCache !== null) 
+        {
+            // console.log(answerStringCache)
+            answerString = JSON.parse(answerStringCache)
+            // console.log('answerString len: ', answerString.length)
+            for (let guess in answerString) {
+                if (answerString[guess].length > 0) {
+                    console.log('Manually submitted guess: ', answerString[guess])
+                    for (let char of answerString[guess]) {
+                        storedLetter = char;
+                        addLetter()//'loadStoredLetters')
+                        answerString[guess].pop() //TODO - this is a temp workaround idealyl refactor code to avoid this (its due to add letter adding letters to answerString, which are already present, we only want addLetter to show the letter but currently it does both - try and refactor it to fix this)
+                    }
+                    submitGuess()
+                    // letterCount = 5; //Need to manually set this when loading the answers in, otherwise they will be rejected
+                    // submitGuess()
+                    // getNextGuess()
+                }
+            }
+        } else { //if doesnt exist, game has ended and we can reset it 
+            for (let guess in answerString) {
+                answerString[guess] = []
+            }
         }
+        // TODO - check is this code neccesary? it may now be redundant 
+        localStorage.setItem('answerString', JSON.stringify(answerString))
+        localStorage.setItem('guessRow', guessRow)
+        localStorage.setItem('letterCount', letterCount)
     }
 }
 
