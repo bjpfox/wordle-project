@@ -16,8 +16,9 @@
 
 // then start adding some extra functionality e.g. session storage - DONE
 
+// handle non letter chars - dont display them in the field 
 // Other ideas:
-//Minor: reset stats should update div instantly
+// Minor: reset stats should update div instantly - DONE
 // countdown timer
 // keep track of points, 
 // hint system 
@@ -149,6 +150,7 @@ function startNewSession() {
         let isLetter = true;
         statusBar.innerText = ""
 
+        // Resuming an old game will have event undefined
         if ((event !== undefined) && (event.type === 'click')) {
             // console.log("You clicked")
             letter = event.target.innerText;
@@ -161,7 +163,11 @@ function startNewSession() {
             } else if (letter === 'ENTER') {
                 isLetter = false;
                 submitGuess()
-            }
+            } else if (letter.match(/[A-Z]/gi) === null || letter.length > 1) {
+                isLetter = false;
+            } 
+            
+            // This is used when an old game state is being resumed via localStorage
         } else {
             letter = storedLetter;
         } 
