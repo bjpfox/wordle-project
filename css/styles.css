@@ -104,5 +104,12 @@ header {
     color: black;
     font-size: larger;
     text-align: center;
-    margin: 20px;
+    margin: 10px;
+}
+
+#player-stats-bar {
+    color: black;
+    font-size: medium;
+    text-align: center;
+    margin-bottom: 5px;
 }

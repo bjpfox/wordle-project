@@ -14,7 +14,16 @@
 // add a play again button - DONE
 // add basic scoreboard to track win/loss %, winning streak, - DONE 
 
-// then start adding some extra functionality e.g. session storage, variable word length, hints, countdown timer, points, css animations, etc
+// then start adding some extra functionality e.g. session storage - DONE
+
+// Other ideas:
+//Minor: reset stats should update div instantly
+// countdown timer
+// keep track of points, 
+// hint system 
+// social media sharing 
+
+// variable word length, hints, countdown timer, points, css animations, etc
 // Session storage - simple way is to remember basic game stats but not full game state. Harder way is to remember all guesses made so far and then correctly load the keyboard and guess tiles - this would require more refactoring of code - although we only process tile updates on guess, so cant we just feed the guess into that function? TODO - look into this more -> Ans: we can just store the guess tring, and then have a function that loops through it, passing each guess to the submitGuess function and incrementing row; that should re-create the right game state
 
 
@@ -115,6 +124,7 @@ function startNewSession() {
     
     // Set up status bar
     const statusBar = document.querySelector('#status-bar')
+    const playerStatsBar = document.querySelector('#player-stats-bar')
 
     // Set up event listener for pressing buttons on keyboard
     document.body.addEventListener('keydown', addLetter) 
@@ -340,8 +350,8 @@ function startNewSession() {
         localStorage.removeItem('letterCount')
         localStorage.removeItem('guessRow')
         
-        statusBar.innerHTML = `Mystery word: ${mysteryWord}
-        <br>Wins: ${playerStats.winCount}
+        statusBar.innerHTML = `Mystery word: ${mysteryWord}`
+        playerStatsBar.innerHTML = `Wins: ${playerStats.winCount}
         <br>Losses: ${playerStats.lossCount}
         <br>Win streak: ${playerStats.winningStreak}`
         newGameButton.style.display = 'inline'
@@ -363,8 +373,8 @@ function startNewSession() {
         localStorage.removeItem('letterCount')
         localStorage.removeItem('guessRow')
         
-        statusBar.innerHTML = `You WIN!
-        <br>Wins: ${playerStats.winCount}
+        statusBar.innerHTML = `You WIN!`
+        playerStatsBar.innerHTML = `Wins: ${playerStats.winCount}
         <br>Losses: ${playerStats.lossCount}
         <br>Win streak: ${playerStats.winningStreak}`
         newGameButton.style.display = 'inline'
@@ -390,6 +400,9 @@ function startNewSession() {
             lossCount: 0,
             winningStreak: 0,
         };
+        playerStatsBar.innerHTML = `Wins: ${playerStats.winCount}
+        <br>Losses: ${playerStats.lossCount}
+        <br>Win streak: ${playerStats.winningStreak}`
     }
     
     function newGame() {
