@@ -29,6 +29,7 @@ header {
 
 .tile-correct {
     background-color: green;
+    color: white;
 }
 
 .tile-somewhere-else {
@@ -72,7 +73,7 @@ header {
     padding: 10px;
 }
 
-.reset-player-stats, .reset-game-data {
+.reset-player-stats, .reset-game-data, .get-hint {
     background-color: cornflowerblue;
     color: white;
     font-size: small;

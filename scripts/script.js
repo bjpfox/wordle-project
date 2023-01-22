@@ -99,8 +99,11 @@ function startNewSession() {
         guess4: [],
         guess5: [],
     }
-    let answerStringCache = ""
-    let storedLetter = ""
+    let answerStringCache = "";
+    let storedLetter = "";
+    let hintsGiven = [];
+    let hintIndex = "";
+    let letterHint = "";
 
     if (localStorage.length > 0) { // TODO - check does this work if some of these exist and others dont? maybe looping through is better.. 
         (localStorage.getItem('playerStats') !== null) && (playerStats = JSON.parse(localStorage.getItem('playerStats')));
@@ -141,6 +144,10 @@ function startNewSession() {
     resetGameData.addEventListener('click', resetStoredGameData)
     const resetPlayerStats = document.querySelector('.reset-player-stats')
     resetPlayerStats.addEventListener('click', resetStoredPlayerStats) 
+
+    // Set up event listener for getHint button 
+    const getHint = document.querySelector('.get-hint')
+    getHint.addEventListener('click', giveHint) 
 
     // Set up event listeners to enable clicking on the keys
     const keys = document.querySelectorAll('.key')
@@ -211,6 +218,32 @@ function startNewSession() {
         localStorage.setItem('letterCount', letterCount)
         localStorage.setItem('guessRow', guessRow)
     }
+    
+    // Provides a hint as to what letters are in word, deducts 2 points for the hint
+    function giveHint() { 
+        const possibleHintLetters = Array.from(keys).filter(function(x) {
+            return (mysteryWord.includes(x.innerText) && x.classList.contains('letter-not-selected') && !(hintsGiven.includes(x.innerText)))
+        })
+        console.log('poss hints: ', possibleHintLetters)
+        if ((possibleHintLetters.length > 0) && (playerStats.points >= 2) && (hintsGiven.length < 3)) {
+            // Generate a new hint letter but don't provide the same hint twice
+            // need to fix this...we want hints given not to include the hint right? 
+            // do {
+            //     hintIndex = Math.floor(Math.random() * (possibleHintLetters.length)) 
+            //     letterHint = possibleHintLetters[hintIndex].innerText
+            // } while (hintsGiven.includes(letterHint))
+            
+            hintIndex = Math.floor(Math.random() * (possibleHintLetters.length)) 
+            letterHint = possibleHintLetters[hintIndex].innerText
+            statusBar.innerText = `The word contains the following letter: ${letterHint}`;
+            playerStats.points -= 2;
+            hintsGiven.push(letterHint)
+            console.log("hintsGiven", hintsGiven)
+        } else {
+            statusBar.innerText = `Sorry, we cannot give any more hints.`; 
+        }
+    }
+    // bug, hints are being given until points run out, hintsGiven array isnt being updated...?
 
     function deleteLetter() {
         statusBar.innerText = ""
@@ -317,20 +350,20 @@ function startNewSession() {
         playerStats.winCount ++;
         playerStats.winningStreak ++;
         playerStats.points += (maxGuesses - guessRow);
-        
-        // After each game, update stats in storage and remove the temp game storage data 
-        localStorage.setItem('playerStats', JSON.stringify(playerStats))
-        localStorage.removeItem('mysteryWord')
-        localStorage.removeItem('answerString')
-        localStorage.removeItem('letterCount')
-        localStorage.removeItem('guessRow')
-        
+
         statusBar.innerHTML = `You WIN!`
         playerStatsBar.innerHTML = `Wins: ${playerStats.winCount}
         <br>Losses: ${playerStats.lossCount}
         <br>Win streak: ${playerStats.winningStreak}
         <br>Points: ${playerStats.points}`
         newGameButton.style.display = 'inline'
+                
+        // After each game, update stats in storage and remove the temp game storage data 
+        localStorage.setItem('playerStats', JSON.stringify(playerStats))
+        localStorage.removeItem('mysteryWord')
+        localStorage.removeItem('answerString')
+        localStorage.removeItem('letterCount')
+        localStorage.removeItem('guessRow')
     }
    
     function getNewWord() {
@@ -353,6 +386,7 @@ function startNewSession() {
             winCount: 0,
             lossCount: 0,
             winningStreak: 0,
+            points: 0,
         };
         playerStatsBar.innerHTML = `Wins: ${playerStats.winCount}
         <br>Losses: ${playerStats.lossCount}
@@ -375,7 +409,10 @@ function startNewSession() {
         }
         guessRow = 0;
         letterCount = 0;
-        
+        hintsGiven = [];
+        hintIndex = "";
+        letterHint = "";
+
         // Get the mystery word from local storage. If it doesnt exist, get a new word (mystery word is removed from storage after each game so if it exists that means a game was in progress)
         // TODO write some notes in README.md on how local storage works (when you set, get, remove, etc and why)
         mysteryWord = localStorage.getItem('mysteryWord');
