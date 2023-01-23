@@ -74,13 +74,15 @@ header {
     padding: 10px;
 }
 
-.reset-player-stats, .reset-game-data, .get-hint, .enable-hard-mode {
+.reset-player-stats, .reset-game-data, .get-hint, .enable-hard-mode, .toggle-player-stats {
     background-color: cornflowerblue;
     color: white;
     font-size: small;
     margin: 3px; 
     padding: 5px;
     border: 0px;
+    min-width: 150px;
+    border-radius: 5px;
 }
 
 .delete-key, .enter-key {

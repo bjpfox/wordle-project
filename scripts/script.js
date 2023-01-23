@@ -76,7 +76,7 @@ function startNewSession() {
 
     // Set up event listeners for stored data reset (TODO: gamedata reset was used only for testing can be removed on final version.  From a user point of view, the new game button achieves the same thing. But we should show new game button all the time, otherwise a refresh wont provide a new game. 
     const resetGameData = document.querySelector('.reset-game-data')
-    resetGameData.addEventListener('click', resetStoredGameData)
+    resetGameData.addEventListener('click', resetGame)
     const resetPlayerStats = document.querySelector('.reset-player-stats')
     resetPlayerStats.addEventListener('click', resetStoredPlayerStats) 
 
@@ -105,13 +105,13 @@ function startNewSession() {
         let isLetter = true;
         statusBar.innerText = ""
 
-        // Resuming an old game will have event undefined
+        // Checks if letter was provided from a click 
         if ((event !== undefined) && (event.type === 'click')) {
-            // console.log("You clicked")
             letter = event.target.innerText;
+        
+        // Checks if letter was provided from a key down. If so, stores the letter in letter, and then checks if it was non-alphanumeric or backspace/enter.  
         } else if ((event !== undefined) && (event.type === 'keydown')) {
             letter = event.key.toUpperCase();
-            // console.log("You pressed this key: ", letter)
             if ((letter === 'BACKSPACE')) {
                 isLetter = false;
                 deleteLetter();
@@ -122,46 +122,43 @@ function startNewSession() {
                 isLetter = false;
             } 
             
-            // This is used when an old game state is being resumed via localStorage
-        } else {
+        // Checks if letter was due to game state being resumed via localStorage
+        } else if (event === undefined) {
             letter = storedLetter;
         } 
 
+        // If letter was a valid alphanumeric, and we haven't exceeded maxLetters, we add it to guessTiles and answerString 
         if (isLetter && (letterCount < maxLetters)) {
             guessTiles[`row${guessRow}`][letterCount].innerText = letter; 
-            // letter.dataset.status = 'selected' // TODO - decide is it worth using data attributes for this problem?
             letterCount++;
             answerString[`guess${guessRow}`].push(letter)
-            localStorage.setItem('answerString', JSON.stringify(answerString)) // TODO - more efficient way? e.g. just alter the letter that changed
+
+            // Store updated answer string and letter count in local storage 
+            localStorage.setItem('answerString', JSON.stringify(answerString)) 
             localStorage.setItem('letterCount', letterCount)
-            // event.target.classList.remove('letter-not-selected') - TODO - letter can stay same colour, or should it change to some other colour when selected, prior to submitting answer? 
         } 
     }
 
 
 
+    // Moves to the next guess row 
     function getNextGuess() {
-        // Moves to the next guess row 
         guessRow ++
         letterCount = 0
         localStorage.setItem('letterCount', letterCount)
-        localStorage.setItem('guessRow', guessRow)
+        //localStorage.setItem('guessRow', guessRow)
     }
     
     // Provides a hint as to what letters are in word, deducts 2 points for the hint
-    function giveHint() { 
+    function giveHint(event) {
+        event.target.blur() // Deselects key after click to prevent an enter key triggering an unintended second button press 
         const possibleHintLetters = Array.from(keys).filter(function(x) {
             return (mysteryWord.includes(x.innerText) && x.classList.contains('letter-not-selected') && !(hintsGiven.includes(x.innerText)))
         })
         //console.log('poss hints: ', possibleHintLetters)
         if ((possibleHintLetters.length > 0) && (playerStats.points >= 2) && (hintsGiven.length < 3)) {
-            // Generate a new hint letter but don't provide the same hint twice
-            // need to fix this...we want hints given not to include the hint right? 
-            // do {
-            //     hintIndex = Math.floor(Math.random() * (possibleHintLetters.length)) 
-            //     letterHint = possibleHintLetters[hintIndex].innerText
-            // } while (hintsGiven.includes(letterHint))
             
+            // Generate a new hint letter but don't provide the same hint twice
             hintIndex = Math.floor(Math.random() * (possibleHintLetters.length)) 
             letterHint = possibleHintLetters[hintIndex].innerText
             statusBar.innerText = `The word contains the following letter: ${letterHint}`;
@@ -172,7 +169,6 @@ function startNewSession() {
             statusBar.innerText = `Sorry, we cannot give any more hints.`; 
         }
     }
-    // bug, hints are being given until points run out, hintsGiven array isnt being updated...?
 
     function deleteLetter() {
         statusBar.innerText = ""
@@ -196,24 +192,22 @@ function startNewSession() {
     }
 
 
-    // Processes each guess attempt              
-    // Note: Test case for double letter scenario: word is MEEDS, first guess MESAS, second guess MENSE 
-    // Note: wordle leaves key letter green as long as any one of the previous attempts had it correct (i.e. it doesnt change it back to yellow or grey based on latest attempt) 
+    // Processes each word guess 
     function submitGuess() {
         statusBar.innerText = ""
         if (letterCount < 5) {
-            // alert("Not enough letters!")
             statusBar.innerText = "Not enough letters!"
         } else {
             let currentGuess = answerString[`guess${guessRow}`].join("")
-            console.log(`You submitted the following guess: ${currentGuess} `)
+            console.log(`You submitted the following guess: ${currentGuess} `) // TODO - used for testing, can be removed 
             if (!validWords.includes(currentGuess)) {
-                statusBar.innerText = "Invalid word!"
-            } else { // If word not right, loop through tiles and letters and update colours accordingly
-                // Loop through our Mystery word one letter at a time
+                statusBar.innerText = "Invalid word!";
+            
+            // If word is valid, loop through our Mystery word one letter at a time
+            } else {
                 for (let i = 0; i < maxLetters; i++) {
 
-                    // If the ith letter of the mystery word letter is in the guess somewhere, figure out which positions in the guess it appears in.assign green for correct position, yellow for others.  
+                    // If the ith letter of the mystery word letter is in the guess somewhere, figure out which position(s) in the guess it appears in. Assign the class for green for correct position, yellow for others.  
                     if (currentGuess.includes(mysteryWord[i])) {
                         let matchingLetterIndexes = findIndexes(currentGuess, mysteryWord[i])
                         // Loop through the matching letters in the guess and change their colours accordingly
@@ -231,7 +225,12 @@ function startNewSession() {
                                 keys.forEach(function(x) {
                                     (x.innerText === mysteryWord[i]) && (!(x.classList.contains('letter-correct'))) && (x.classList = 'key letter-somewhere-else')
                                 }) 
-                                // TODO maybe use id letters instead of looping through all keys?
+                                // TODO maybe faster to use id letters instead of looping through all keys?
+                                // e.g.
+                                // Select the corresponding key on keyboard, and if it isnt already green (correct), set it to the yellow class (somewhere-else)
+                                // const currentLetterKey = document.getElementById(`key-${mysteryWord[i]}`);
+                                // !(currentLetterKey.classList.contains('letter-correct')) && (currentLetterKey.classList = 'key letter-somewhere-else')
+                                
                             }
                         } 
                     }
@@ -255,6 +254,7 @@ function startNewSession() {
         }
     }
 
+    // Displays the lose game result, updates players stats accordingly  
     function loseGame() {
         playerStats.lossCount ++
         playerStats.winningStreak = 0 
@@ -264,16 +264,14 @@ function startNewSession() {
         localStorage.removeItem('mysteryWord')
         localStorage.removeItem('answerString')
         localStorage.removeItem('letterCount')
-        localStorage.removeItem('guessRow')
+        //localStorage.removeItem('guessRow')
         
         statusBar.innerHTML = `Mystery word: ${mysteryWord}`
-        playerStatsBar.innerHTML = `Wins: ${playerStats.winCount}
-        <br>Losses: ${playerStats.lossCount}
-        <br>Win streak: ${playerStats.winningStreak}
-        <br>Points: ${playerStats.points}`
+        !(areStatsDisplayed) && togglePlayerStats() // If stats are off, show them
         newGameButton.style.display = 'inline'
     }
     
+    // Displays the win game result and updates player stats accordingly 
     function winGame() {
         // alert("You win!")
         playerStats.winCount ++;
@@ -281,35 +279,38 @@ function startNewSession() {
         playerStats.points += (maxGuesses - guessRow);
 
         statusBar.innerHTML = `You WIN!`
-        playerStatsBar.innerHTML = `Wins: ${playerStats.winCount}
-        <br>Losses: ${playerStats.lossCount}
-        <br>Win streak: ${playerStats.winningStreak}
-        <br>Points: ${playerStats.points}`
-        newGameButton.style.display = 'inline'
+        // newGameButton.style.display = 'inline'
+        !(areStatsDisplayed) && togglePlayerStats() // If stats are off, show them
                 
         // After each game, update stats in storage and remove the temp game storage data 
         localStorage.setItem('playerStats', JSON.stringify(playerStats))
         localStorage.removeItem('mysteryWord')
         localStorage.removeItem('answerString')
         localStorage.removeItem('letterCount')
-        localStorage.removeItem('guessRow')
+        //localStorage.removeItem('guessRow')
     }
-   
+  
+    // Gets (randomly selects) a new mystery word 
     function getNewWord() {
         const wordIndex = Math.floor((Math.random())*(guessWords.length))
         mysteryWord = guessWords[wordIndex]
         localStorage.setItem('mysteryWord', mysteryWord) 
-        console.log('we picked the following word: ', mysteryWord)
+        console.log('we picked the following word: ', mysteryWord) // Used for tesitng only
     }
-    function resetStoredGameData() {
+
+    // Resets the current game and launches a new game  
+    function resetGame(event) {
+        event.target.blur() // Deselects key after click to prevent an enter key triggering an unintended second button press 
         localStorage.removeItem('mysteryWord')
         localStorage.removeItem('answerString')
         localStorage.removeItem('letterCount')
-        localStorage.removeItem('guessRow')
+        //localStorage.removeItem('guessRow')
         newGame()
     }
 
-    function resetStoredPlayerStats() {
+    // Resets any stored player stats 
+    function resetStoredPlayerStats(event) {
+        event.target.blur() // Deselects key after click to prevent an enter key triggering an unintended second button press 
         localStorage.removeItem('playerStats')
         playerStats = {
             winCount: 0,
@@ -317,17 +318,17 @@ function startNewSession() {
             winningStreak: 0,
             points: 0,
         };
-        playerStatsBar.innerHTML = `Wins: ${playerStats.winCount}
-        <br>Losses: ${playerStats.lossCount}
-        <br>Win streak: ${playerStats.winningStreak}`
+        !(areStatsDisplayed) && togglePlayerStats() // If stats are off, show them
     }
-   
+
+    // TODO - add storage of player preferences for hard mode?
     let isHardModeEnabled = false;
     const hardModeButton = document.querySelector('.enable-hard-mode')
     hardModeButton.addEventListener('click', toggleDifficultyLevel)
     
     // Switches between hard mode and normal mode 
-    function toggleDifficultyLevel() {
+    function toggleDifficultyLevel(event) {
+        event.target.blur() // Deselects key after click to prevent an enter key triggering an unintended second button press 
         if (isHardModeEnabled) {
             isHardModeEnabled = false
             hardModeButton.innerText = 'Switch to Hard Mode'
@@ -338,6 +339,28 @@ function startNewSession() {
             guessWords = hardModeWords;
         }
     }
+    
+    // Switches between showing and hiding player stats 
+    let areStatsDisplayed = false;
+    const togglePlayerStatsButton = document.querySelector('.toggle-player-stats')
+    togglePlayerStatsButton.addEventListener('click', togglePlayerStats)
+
+    function togglePlayerStats(event) {
+        (event !== undefined) && event.target.blur() // Deselects key after click to prevent an enter key triggering an unintended second button press 
+        if (areStatsDisplayed) {
+            areStatsDisplayed = false
+            togglePlayerStatsButton.innerText = 'Show Player Stats'
+            playerStatsBar.innerHTML = ""
+        } else {
+            areStatsDisplayed = true 
+            togglePlayerStatsButton.innerText = 'Hide Player Stats'
+            playerStatsBar.innerHTML = `Wins: ${playerStats.winCount}
+            <br>Losses: ${playerStats.lossCount}
+            <br>Win streak: ${playerStats.winningStreak}
+            <br>Points: ${playerStats.points}`
+        }
+    }
+    
 
     // Reset game variables and get a new word, or recover game if game is in storage
     function newGame() {
@@ -360,7 +383,6 @@ function startNewSession() {
         letterHint = "";
 
         // Get the mystery word from local storage. If it doesnt exist, get a new word (mystery word is removed from storage after each game so if it exists that means a game was in progress)
-        // TODO write some notes in README.md on how local storage works (when you set, get, remove, etc and why)
         mysteryWord = localStorage.getItem('mysteryWord');
         (mysteryWord === null) && getNewWord()
 
@@ -368,12 +390,8 @@ function startNewSession() {
         // guessRow = localStorage.getItem('guessRow');
         // (guessRow === null) && (guessRow = 0)
         
-        // TODO - decide if its worth retrieving partly entered words? 
-        // For now I think its OK to just retrieve submitted answers only
-        // letterCount = localStorage.getItem('letterCount');
-        // (letterCount === 'null') && (letterCount = 0)
         letterCount = 0;
-        console.log(mysteryWord, guessRow, letterCount)
+        // console.log(mysteryWord, guessRow, letterCount)
        
         // If answerString exists, a game was in progress so retrieve it from storage, and submit the previous answers. Else empty it. 
         answerStringCache = localStorage.getItem('answerString'); 
@@ -400,12 +418,13 @@ function startNewSession() {
         }
         // TODO - check is this code neccesary? it may now be redundant 
         localStorage.setItem('answerString', JSON.stringify(answerString))
-        localStorage.setItem('guessRow', guessRow)
+        //localStorage.setItem('guessRow', guessRow)
         localStorage.setItem('letterCount', letterCount)
     }
 
     // Start session by launching a new game    
     newGame() 
+    console.log(`Mystery word is: ${mysteryWord}`)
 
 }
 
