@@ -267,7 +267,7 @@ function startNewSession() {
         //localStorage.removeItem('guessRow')
         
         statusBar.innerHTML = `Mystery word: ${mysteryWord}`
-        !(areStatsDisplayed) && togglePlayerStats() // If stats are off, show them
+        !areStatsDisplayed ? togglePlayerStats() : togglePlayerStats() || togglePlayerStats() // If stats are off, show them, else toggle twice to update numbers 
         newGameButton.style.display = 'inline'
     }
     
@@ -280,7 +280,7 @@ function startNewSession() {
 
         statusBar.innerHTML = `You WIN!`
         // newGameButton.style.display = 'inline'
-        !(areStatsDisplayed) && togglePlayerStats() // If stats are off, show them
+        !areStatsDisplayed ? togglePlayerStats() : togglePlayerStats() || togglePlayerStats() // If stats are off, show them, else toggle twice to update numbers 
                 
         // After each game, update stats in storage and remove the temp game storage data 
         localStorage.setItem('playerStats', JSON.stringify(playerStats))
@@ -318,7 +318,7 @@ function startNewSession() {
             winningStreak: 0,
             points: 0,
         };
-        !(areStatsDisplayed) && togglePlayerStats() // If stats are off, show them
+        !areStatsDisplayed ? togglePlayerStats() : togglePlayerStats() || togglePlayerStats() // If stats are off, show them, else toggle twice to update numbers 
     }
 
     // TODO - add storage of player preferences for hard mode?
