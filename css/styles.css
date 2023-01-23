@@ -58,7 +58,8 @@ header {
     height: 50px;
     font-size: 10px;
     margin: 0px;
-
+    border-radius: 10px;
+    border: 0px;
 }
 
 .nav-bar {
@@ -79,6 +80,7 @@ header {
     font-size: small;
     margin: 3px; 
     padding: 5px;
+    border: 0px;
 }
 
 .delete-key, .enter-key {
@@ -87,6 +89,8 @@ header {
     height: 50px;
     font-size: 10px;
     margin: 1px;
+    border-radius: 10px;
+    border: 0px;
 }
 
 .letter-not-present {
