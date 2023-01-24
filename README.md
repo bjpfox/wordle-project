@@ -34,6 +34,7 @@ Ideas for extensions:
 6. winGame() displays the win result and updates the game stats. 
 7. loseGame() displays the lose result and updates the game stats. 
 
+//TODO - start new game button not appearing?
 
 ## Technical aspects
 1. LocalStorage - TODO

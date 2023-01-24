@@ -267,7 +267,7 @@ function startNewSession() {
         //localStorage.removeItem('guessRow')
         
         statusBar.innerHTML = `Mystery word: ${mysteryWord}`
-        !areStatsDisplayed ? togglePlayerStats() : togglePlayerStats() || togglePlayerStats() // If stats are off, show them, else toggle twice to update numbers 
+        !areStatsDisplayed ? togglePlayerStats() : togglePlayerStats() || togglePlayerStats() //If stats were off, show them (so user can see they have changed), else just toggle twice to update numbers 
         newGameButton.style.display = 'inline'
     }
     
@@ -279,8 +279,9 @@ function startNewSession() {
         playerStats.points += (maxGuesses - guessRow);
 
         statusBar.innerHTML = `You WIN!`
-        // newGameButton.style.display = 'inline'
-        !areStatsDisplayed ? togglePlayerStats() : togglePlayerStats() || togglePlayerStats() // If stats are off, show them, else toggle twice to update numbers 
+        newGameButton.style.display = 'inline';
+
+        !areStatsDisplayed ? togglePlayerStats() : togglePlayerStats() || togglePlayerStats() //If stats were off, show them (so user can see they have changed), else just toggle twice to update numbers 
                 
         // After each game, update stats in storage and remove the temp game storage data 
         localStorage.setItem('playerStats', JSON.stringify(playerStats))
@@ -318,25 +319,33 @@ function startNewSession() {
             winningStreak: 0,
             points: 0,
         };
-        !areStatsDisplayed ? togglePlayerStats() : togglePlayerStats() || togglePlayerStats() // If stats are off, show them, else toggle twice to update numbers 
+        !areStatsDisplayed ? togglePlayerStats() : togglePlayerStats() || togglePlayerStats() // If stats were off, show them (so user can see they have changed), else just toggle twice to update numbers 
     }
 
-    // TODO - add storage of player preferences for hard mode?
     let isHardModeEnabled = false;
-    const hardModeButton = document.querySelector('.enable-hard-mode')
-    hardModeButton.addEventListener('click', toggleDifficultyLevel)
+    const hardModeButton = document.querySelector('.enable-hard-mode');
+    hardModeButton.addEventListener('click', toggleDifficultyLevel);
+
+// Interesting bug - when localStorage retrieves the boolean false it comes back as the string 'false' which is truthy so gets taken as true! One way to fix this is to use JSON.parse to ensure the string gets converted to boolean. Some discussion about string to boolean conversion in JS here: https://stackoverflow.com/questions/263965/how-can-i-convert-a-string-to-boolean-in-javascript 
+    (localStorage.getItem('isHardModeEnabled') !== null) && (isHardModeEnabled = JSON.parse((localStorage.getItem('isHardModeEnabled')))) //If hardModeEnabled is in storage, retrieve it 
+  
+    // Toggle twice to update button text based on users stored preference: 
+    toggleDifficultyLevel()
+    toggleDifficultyLevel()
     
     // Switches between hard mode and normal mode 
     function toggleDifficultyLevel(event) {
-        event.target.blur() // Deselects key after click to prevent an enter key triggering an unintended second button press 
+        (event !== undefined) && event.target.blur() // Deselects key after click to prevent an enter key triggering an unintended second button press 
         if (isHardModeEnabled) {
             isHardModeEnabled = false
             hardModeButton.innerText = 'Switch to Hard Mode'
             guessWords = normalModeWords;
+            localStorage.setItem('isHardModeEnabled', isHardModeEnabled)
         } else {
             isHardModeEnabled = true 
             hardModeButton.innerText = 'Switch to Normal Mode'
             guessWords = hardModeWords;
+            localStorage.setItem('isHardModeEnabled', isHardModeEnabled)
         }
     }
     
