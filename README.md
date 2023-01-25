@@ -38,9 +38,15 @@ The app has the following features has the same basic game play as [Wordle](http
 6. winGame() displays the win result and updates the game stats. 
 7. loseGame() displays the lose result and updates the game stats. 
 
+
+## Approach taken for specific features
+1. Local storage
+1. Hint system
+1. Normal mode / hard mode 
+ 
 ## Technologies used 
 1. LocalStorage - TODO
-1. 
+1.  
 
 
 ## Installation instructions  
