@@ -28,6 +28,7 @@ function startNewSession() {
         guess5: [], }
     let answerStringCache = "";
     let storedLetter = "";
+    let isGameInProgress = false; // Used to prevent multiple submits once game has ended 
 
     // Define variables used to provide hints
     let hintsGiven = [];
@@ -193,69 +194,73 @@ function startNewSession() {
 
 
     // Processes each word guess 
-    function submitGuess() {
-        statusBar.innerText = ""
-        if (letterCount < 5) {
-            statusBar.innerText = "Not enough letters!"
-        } else {
-            let currentGuess = answerString[`guess${guessRow}`].join("")
-            console.log(`You submitted the following guess: ${currentGuess} `) // TODO - used for testing, can be removed 
-            if (!validWords.includes(currentGuess)) {
-                statusBar.innerText = "Invalid word!";
-            
-            // If word is valid, loop through our Mystery word one letter at a time
+    function submitGuess(event) {
+        (event !== undefined) && event.target.blur() // Deselects key after click to prevent an enter key triggering an unintended second button press 
+        if (isGameInProgress) {
+            statusBar.innerText = ""
+            if (letterCount < 5) {
+                statusBar.innerText = "Not enough letters!"
             } else {
-                for (let i = 0; i < maxLetters; i++) {
+                let currentGuess = answerString[`guess${guessRow}`].join("")
+                console.log(`You submitted the following guess: ${currentGuess} `) // TODO - used for testing, can be removed 
+                if (!validWords.includes(currentGuess)) {
+                    statusBar.innerText = "Invalid word!";
+                
+                // If word is valid, loop through our Mystery word one letter at a time
+                } else {
+                    for (let i = 0; i < maxLetters; i++) {
 
-                    // If the ith letter of the mystery word letter is in the guess somewhere, figure out which position(s) in the guess it appears in. Assign the class for green for correct position, yellow for others.  
-                    if (currentGuess.includes(mysteryWord[i])) {
-                        let matchingLetterIndexes = findIndexes(currentGuess, mysteryWord[i])
-                        // Loop through the matching letters in the guess and change their colours accordingly
-                        for (let index of matchingLetterIndexes) {
-                            if (index === i) {
-                                // If indexes match, i-th letter is in correct position, so we set the i-th letter on guess tile to green and find the equivalent letter on keyboard and make it gree
-                                guessTiles[`row${guessRow}`][i].classList = 'guess-tile tile-correct'
-                                keys.forEach(function(x) {
-                                    (x.innerText === currentGuess[i]) && (x.classList = 'key letter-correct')
-                                }); 
-                            } else {                                 
-                                // Else, where indexes dont match, we set the respective letter on guess tile to yellow. And we set the keyboard letter to yellow, as long as its not already green. 
-                                const targetGuessTile = guessTiles[`row${guessRow}`][index];
-                                !(targetGuessTile.classList.contains('tile-correct')) && (targetGuessTile.classList = 'guess-tile tile-somewhere-else');
-                                keys.forEach(function(x) {
-                                    (x.innerText === mysteryWord[i]) && (!(x.classList.contains('letter-correct'))) && (x.classList = 'key letter-somewhere-else')
-                                }) 
-                                // TODO maybe faster to use id letters instead of looping through all keys?
-                                // e.g.
-                                // Select the corresponding key on keyboard, and if it isnt already green (correct), set it to the yellow class (somewhere-else)
-                                // const currentLetterKey = document.getElementById(`key-${mysteryWord[i]}`);
-                                // !(currentLetterKey.classList.contains('letter-correct')) && (currentLetterKey.classList = 'key letter-somewhere-else')
-                                
-                            }
-                        } 
+                        // If the ith letter of the mystery word letter is in the guess somewhere, figure out which position(s) in the guess it appears in. Assign the class for green for correct position, yellow for others.  
+                        if (currentGuess.includes(mysteryWord[i])) {
+                            let matchingLetterIndexes = findIndexes(currentGuess, mysteryWord[i])
+                            // Loop through the matching letters in the guess and change their colours accordingly
+                            for (let index of matchingLetterIndexes) {
+                                if (index === i) {
+                                    // If indexes match, i-th letter is in correct position, so we set the i-th letter on guess tile to green and find the equivalent letter on keyboard and make it gree
+                                    guessTiles[`row${guessRow}`][i].classList = 'guess-tile tile-correct'
+                                    keys.forEach(function(x) {
+                                        (x.innerText === currentGuess[i]) && (x.classList = 'key letter-correct')
+                                    }); 
+                                } else {                                 
+                                    // Else, where indexes dont match, we set the respective letter on guess tile to yellow. And we set the keyboard letter to yellow, as long as its not already green. 
+                                    const targetGuessTile = guessTiles[`row${guessRow}`][index];
+                                    !(targetGuessTile.classList.contains('tile-correct')) && (targetGuessTile.classList = 'guess-tile tile-somewhere-else');
+                                    keys.forEach(function(x) {
+                                        (x.innerText === mysteryWord[i]) && (!(x.classList.contains('letter-correct'))) && (x.classList = 'key letter-somewhere-else')
+                                    }) 
+                                    // TODO maybe faster to use id letters instead of looping through all keys?
+                                    // e.g.
+                                    // Select the corresponding key on keyboard, and if it isnt already green (correct), set it to the yellow class (somewhere-else)
+                                    // const currentLetterKey = document.getElementById(`key-${mysteryWord[i]}`);
+                                    // !(currentLetterKey.classList.contains('letter-correct')) && (currentLetterKey.classList = 'key letter-somewhere-else')
+                                    
+                                }
+                            } 
+                        }
                     }
-                }
 
-                // Next we loop through remaining guess letters and for any letters we find that are not yet yellow or green on guess tile, they mustnt be in the word. So we just set them to grey on guess tile and grey on keyboard (if they're not already yellow/green on keyboard)                        
-                for (let i = 0; i < currentGuess.length; i++) {
-                    // Update the guess tiles to grey if not already green/yellow 
-                    const targetGuessTile = guessTiles[`row${guessRow}`][i];
-                    (!targetGuessTile.classList.contains('tile-correct')) && (!targetGuessTile.classList.contains('tile-somewhere-else')) && (targetGuessTile.classList = 'guess-tile tile-not-present')
+                    // Next we loop through remaining guess letters and for any letters we find that are not yet yellow or green on guess tile, they mustnt be in the word. So we just set them to grey on guess tile and grey on keyboard (if they're not already yellow/green on keyboard)                        
+                    for (let i = 0; i < currentGuess.length; i++) {
+                        // Update the guess tiles to grey if not already green/yellow 
+                        const targetGuessTile = guessTiles[`row${guessRow}`][i];
+                        (!targetGuessTile.classList.contains('tile-correct')) && (!targetGuessTile.classList.contains('tile-somewhere-else')) && (targetGuessTile.classList = 'guess-tile tile-not-present')
 
-                    // Update the keys to grey if not already green/yellow 
-                    keys.forEach(function(x) {
-                            (x.innerText === currentGuess[i]) && (!(x.classList.contains('letter-correct'))) && (!(x.classList.contains('letter-somewhere-else'))) && (x.classList = 'key letter-not-present')
-                        }) 
+                        // Update the keys to grey if not already green/yellow 
+                        keys.forEach(function(x) {
+                                (x.innerText === currentGuess[i]) && (!(x.classList.contains('letter-correct'))) && (!(x.classList.contains('letter-somewhere-else'))) && (x.classList = 'key letter-not-present')
+                            }) 
+                    }
+                    // If user hasnt run out of guesses, give them another guess. Otherwise, end the game. 
+                    (currentGuess === mysteryWord) ? setTimeout(winGame, 1) : 
+                    (guessRow < 5) ? getNextGuess() : setTimeout(loseGame, 1)
                 }
-                // If user hasnt run out of guesses, give them another guess. Otherwise, end the game. 
-                (currentGuess === mysteryWord) ? setTimeout(winGame, 1) : 
-                (guessRow < 5) ? getNextGuess() : setTimeout(loseGame, 1)
             }
         }
     }
 
     // Displays the lose game result, updates players stats accordingly  
     function loseGame() {
+        isGameInProgress = false;
         playerStats.lossCount ++
         playerStats.winningStreak = 0 
         
@@ -274,6 +279,7 @@ function startNewSession() {
     // Displays the win game result and updates player stats accordingly 
     function winGame() {
         // alert("You win!")
+        isGameInProgress = false;
         playerStats.winCount ++;
         playerStats.winningStreak ++;
         playerStats.points += (maxGuesses - guessRow);
@@ -363,16 +369,33 @@ function startNewSession() {
         } else {
             areStatsDisplayed = true 
             togglePlayerStatsButton.innerText = 'Hide Player Stats'
-            playerStatsBar.innerHTML = `Wins: ${playerStats.winCount}
-            <br>Losses: ${playerStats.lossCount}
-            <br>Win streak: ${playerStats.winningStreak}
-            <br>Points: ${playerStats.points}`
+            playerStatsBar.innerHTML = getPlayerStats()
         }
     }
-    
+   
+    // Gets playerStats and returns in a HTML formatted string 
+    function getPlayerStats() {
+        return `Win rate: ${getWinPercentage(playerStats.winCount, playerStats.lossCount)}%
+        <br>Consecutive wins: ${playerStats.winningStreak}
+        <br>Total wins: ${playerStats.winCount}
+        <br>Total losses: ${playerStats.lossCount}
+        <br>Points: ${playerStats.points}`
+    }
+
+    // Returns win percentage, as an integer, rounded to the nearest integer 
+    function getWinPercentage(wins, losses) {
+        if ((losses === 0) && (wins === 0)) {
+            return 0;
+        } else if ((losses === 0) && (wins > 0)) {
+            return 100;
+        } else {
+            return Math.round(100*(wins/(wins+losses)))
+        }
+    }
 
     // Reset game variables and get a new word, or recover game if game is in storage
     function newGame() {
+        isGameInProgress = true;
         newGameButton.style.display = 'none' // TODO - currently this means players have to wait til end of game - should players be able to reset in middle of game? 
         statusBar.innerText = ""
         for (let key of keys) {
@@ -407,6 +430,7 @@ function startNewSession() {
         if (answerStringCache !== null) 
         {
             // console.log(answerStringCache)
+            isGameInProgress = true; // Used to allow submit when loading game state from storage 
             answerString = JSON.parse(answerStringCache)
             // console.log('answerString len: ', answerString.length)
             for (let guess in answerString) {

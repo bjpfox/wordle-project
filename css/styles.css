@@ -3,7 +3,7 @@ body {
 }
 
 header {
-    color: blue;
+    color: cornflowerblue;
     text-align: center;
     font-size: larger;
 }
@@ -28,16 +28,16 @@ header {
 }
 
 .tile-correct {
-    background-color: green;
-    color: white;
+    background-color: #70af85;
+    color: black;
 }
 
 .tile-somewhere-else {
-    background-color: yellow;
+    background-color: #ffeb91;
 }
 
 .tile-not-present {
-    background-color: grey;
+    background-color: #9d9d9d;
     color: white;
 }
 
@@ -96,18 +96,18 @@ header {
 }
 
 .letter-not-present {
-    background-color: gray;
+    background-color: #9d9d9d;
     color: white;
 }
 
 .letter-somewhere-else {
-    background-color: yellow;
+    background-color: #ffeb91;
     color: black;
 }
 
 .letter-correct {
-    background-color: green;
-    color: white;
+    background-color: #70af85;
+    color: black;
 }
 
 .letter-not-selected {
