@@ -501,6 +501,40 @@ function startNewSession() {
     function deobfuscateString(obfuscatedText) {
         return atob(obfuscatedText)
     }
+    
+    const instructionsLink = document.querySelector('#show-instructions-link');
+    instructionsLink.addEventListener('click', toggleInstructions)
+    let areInstructionsDisplayed = false;
+    function toggleInstructions() {
+        if (!areInstructionsDisplayed) {
+            const instructionsDiv = document.createElement('div');
+            instructionsDiv.classList.add('instructions-container');
+            instructionsDiv.innerHTML = `<h2>How to Play</h2>
+            <p> <b>Basic game-play:</b>
+            <br>Figure out the mystery word by using the tile colours to improve your guess: 
+            <ul>
+            <li>Green tiles: letter appears in word in the same position as the players guess</li>
+            <li>Yellow tile: letter appears in word in a different position from the player guess</li>
+            <li>Dark grey tile: letter does not appear in the word</li>
+            </ul>
+            <p><b>Hard-mode / normal mode:</b>
+            <br>Switch to a harder dictionary with more difficult words
+            <p><b>Request a hint:</b>
+            <br>For 2 points, a letter from the mystery word which hasn't yet been guessed is revealed. You can do this a maximum of 3 times, or until you run out of points or letters. 
+            <p>
+            <p><a href='#' id="close-instructions-link">Close Instructions</a>`
+            document.querySelector('.guess-board').appendChild(instructionsDiv)  
+            document.querySelector('#close-instructions-link').addEventListener('click', toggleInstructions)
+            const closeIconDiv = document.createElement('div')
+            closeIconDiv.innerHTML = `<a href='#' id="close-instructions-icon">X</a>`
+            instructionsDiv.appendChild(closeIconDiv)
+            document.querySelector('#close-instructions-icon').addEventListener('click', toggleInstructions)
+            areInstructionsDisplayed = true; 
+        } else {
+            document.querySelector('.instructions-container').remove();
+            areInstructionsDisplayed = false;
+        }
+    }
 
     // Start session by launching a new game    
     newGame() 
