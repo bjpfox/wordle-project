@@ -30,6 +30,7 @@ function startNewSession() {
     let answerStringCache = "";
     let storedLetter = "";
     let isGameInProgress = false; // Used to prevent multiple submits once game has ended 
+    let hasSharedWordBeenUsedYet = false; // Used to load the shared word on first game play, and then switch to dictionary words for subsequent games 
 
     // Define variables used to provide hints
     let hintsGiven = [];
@@ -165,15 +166,18 @@ function startNewSession() {
             statusBar.innerText = `Sorry, we cannot give any more hints.`; 
         }
     }
-
+    
+    // Deletes the last letter entered
     function deleteLetter() {
-        statusBar.innerText = ""
-        if (letterCount > 0) {
-            letterCount --
-            guessTiles[`row${guessRow}`][letterCount].innerText = ""; 
-            answerString[`guess${guessRow}`].pop();
-            localStorage.setItem('answerString', JSON.stringify(answerString)) 
-            localStorage.setItem('letterCount', letterCount)
+        if (isGameInProgress) { // Prevents player from changing guess once game has ended 
+            statusBar.innerText = ""
+            if (letterCount > 0) {
+                letterCount --
+                guessTiles[`row${guessRow}`][letterCount].innerText = ""; 
+                answerString[`guess${guessRow}`].pop();
+                localStorage.setItem('answerString', JSON.stringify(answerString)) 
+                localStorage.setItem('letterCount', letterCount)
+            }
         }
     }
 
@@ -284,10 +288,16 @@ function startNewSession() {
   
     // Gets a new mystery word 
     function getNewWord() {
-        const wordIndex = Math.floor((Math.random())*(guessWords.length))
-        mysteryWord = guessWords[wordIndex]
-        localStorage.setItem('mysteryWord', mysteryWord) 
-        console.log('we picked the following word: ', mysteryWord) // Used for tesitng only
+        // If page was accessed from a shareable link, and word hasnt been used yet, load the shared mystery word. Else load a randomly selected word. 
+        if (checkUrlForSharedWord() && !hasSharedWordBeenUsedYet) {
+            mysteryWord = checkUrlForSharedWord();
+            hasSharedWordBeenUsedYet = true;
+        } else {
+                const wordIndex = Math.floor((Math.random())*(guessWords.length))
+                mysteryWord = guessWords[wordIndex]
+                localStorage.setItem('mysteryWord', mysteryWord) 
+                console.log('we picked the following word: ', mysteryWord) // Used for tesitng only
+        }
     }
 
     // Resets the current game and launches a new game  
@@ -433,10 +443,73 @@ function startNewSession() {
         // localStorage.setItem('answerString', JSON.stringify(answerString))
         // localStorage.setItem('letterCount', letterCount)
     }
+    
+    // Enable players to create a shareable link so they're friends can try solving the same word
+    const shareCurrentWordText = document.querySelector('#share-current-word')
+    shareCurrentWordText.addEventListener('click', createShareableLink)
+
+    // Checks if URL has a shared word. Returns false if no shared word is present, else returns the (deobfuscated) shared mystery word
+    function checkUrlForSharedWord() {
+        const currentURL = document.URL;
+        const obfuscatedMysteryWord = currentURL.replace(/.*\?q=/,"")
+        console.log('obf word is: ', obfuscatedMysteryWord)
+        if (obfuscatedMysteryWord.length > 0) {
+            try {
+                console.log('shareable link was used and mystery word was: ', deobfuscateString(obfuscatedMysteryWord))
+                return deobfuscateString(obfuscatedMysteryWord)
+            } catch {
+                return false;
+            }
+        } else {
+            return false;
+        } 
+    }
+    
+    // Create a div to display the link, which can be toggled on and off
+    let isShareableLinkDivDisplayed = false; 
+    const sharedLinkbar = document.querySelector('#shared-link-bar')
+    function createShareableLink() {
+        // const defaultURL = `https://bjpfox.github.io/wordle-project`;
+        // Strip off any current shared word text, so we dont add to any past text 
+        if (!isShareableLinkDivDisplayed) {
+            const defaultURL = document.URL.replace(/\?q=.*/,"").replace(/#/,""); 
+            const shareableURL = `${defaultURL}?q=${obfuscateString(mysteryWord)}`            
+            console.log(shareableURL)
+            const shareableLinkDiv = document.createElement('div')
+            shareableLinkDiv.classList.add('shareable-URL-div')
+            shareableLinkDiv.innerHTML = `Want to challenge a friend to solve the same word? Just send this link to your friend:
+            <br><a href=${shareableURL} id='shareable-link'>Shareable Link</a>
+            <img width="20" src="./img/clippy.png" alt="clipboard icon" id="clipboard-icon">`
+
+            // Enable copy and paste link to users clipboard 
+            shareableLinkDiv.addEventListener('click', function() {
+                navigator.clipboard.writeText(shareableURL)
+            })
+            sharedLinkbar.appendChild(shareableLinkDiv)  
+            isShareableLinkDivDisplayed = true;
+        } else {
+            const sharedLinkDiv = document.querySelector('.shareable-URL-div')
+            sharedLinkDiv.remove()
+            isShareableLinkDivDisplayed = false;
+        }
+    }
+
+    // To obfuscate the text (so as to not give away the mystery word), I used the base64 encoding approach mentioned here: https://stackoverflow.com/questions/14458819/simplest-way-to-obfuscate-and-deobfuscate-a-string-in-javascript 
+    function obfuscateString(plainText) {
+        return btoa(plainText)
+    }
+    function deobfuscateString(obfuscatedText) {
+        return atob(obfuscatedText)
+    }
 
     // Start session by launching a new game    
     newGame() 
+
+    // TODO - below is for testing, can be deleted
     console.log(`Mystery word is: ${mysteryWord}`)
+    // console.log('obs text: ', obfuscateString(mysteryWord))
+    // let messyText = obfuscateString(mysteryWord)
+    // console.log('de obs text: ', deobfuscateString(messyText))
 }
 
 startNewSession()

@@ -128,3 +128,35 @@ header {
     text-align: center;
     margin-bottom: 5px;
 }
+
+#share-current-word {
+    font-size: smaller;
+    text-decoration: none;
+    color: cornflowerblue;
+}
+
+#shared-link-bar {
+    font-size: smaller;
+    text-align: center;
+}
+
+.shareable-URL {
+    /* border: solid grey 1px;*/
+    border-radius: 3px;
+    padding: 5px;
+    display: inline-block;
+}
+
+.shareable-URL-div {
+    border: solid grey 1px;
+    border-radius: 3px;
+    padding: 5px;
+    display: inline-block;
+    width: 250px;
+}
+
+#clipboard-icon {
+    position: relative;
+    margin-left: 6px;
+    top: 4px;
+}
