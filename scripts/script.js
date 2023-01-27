@@ -150,22 +150,30 @@ function startNewSession() {
     // Provides a hint as to what letters are in word, deducts 2 points for the hint
     function giveHint(event) {
         event.target.blur() // Deselects key after click to prevent an enter key triggering an unintended second button press 
+        // Generate list of possible hint letters, exclude letters already selected or hints already given 
         const possibleHintLetters = Array.from(keys).filter(function(x) {
             return (mysteryWord.includes(x.innerText) && x.classList.contains('letter-not-selected') && !(hintsGiven.includes(x.innerText)))
         })
         //console.log('poss hints: ', possibleHintLetters) - TODO - can be deleted - used for testing only
-        if ((possibleHintLetters.length > 0) && (playerStats.points >= 2) && (hintsGiven.length < 3)) {
-            
-            // Generate a new hint letter but don't provide the same hint twice
+        if (possibleHintLetters.length < 1) {
+            statusBar.innerText = `Sorry, there are no more letters.`; 
+        } else if (playerStats.points < 2) {
+            statusBar.innerText = `Sorry, you don't have enough points.`; 
+        } else if (hintsGiven.length >= 3) {
+            statusBar.innerText = `Sorry, a maximum of 3 hints is allowed.`; 
+        } else {
             hintIndex = Math.floor(Math.random() * (possibleHintLetters.length)) 
             letterHint = possibleHintLetters[hintIndex].innerText
             statusBar.innerText = `The word contains the following letter: ${letterHint}`;
             playerStats.points -= 2;
             hintsGiven.push(letterHint)
-            // console.log("hintsGiven", hintsGiven) - TODO - can be deleted - used for testing only
-        } else {
-            statusBar.innerText = `Sorry, we cannot give any more hints.`; 
+            !areStatsDisplayed ? togglePlayerStats() : togglePlayerStats() || togglePlayerStats() // If stats were off, show them (so user can see they have changed), else just toggle twice to update numbers 
         }
+
+        // if ((possibleHintLetters.length > 0) && (playerStats.points >= 2) && (hintsGiven.length < 3)) {
+        // } else {
+        //     statusBar.innerText = `Sorry, we cannot give any more hints.`; 
+        // }
     }
     
     // Deletes the last letter entered
