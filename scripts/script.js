@@ -477,15 +477,24 @@ function startNewSession() {
             const shareableLinkDiv = document.createElement('div')
             shareableLinkDiv.classList.add('shareable-URL-div')
             shareableLinkDiv.innerHTML = `Want to challenge a friend to solve the same word? Just send this link to your friend:
-            <br><a href=${shareableURL} id='shareable-link'>Shareable Link</a>
-            <img width="20" src="./img/clippy.png" alt="clipboard icon" id="clipboard-icon">`
-
-            // Enable copy and paste link to users clipboard 
-            shareableLinkDiv.addEventListener('click', function() {
-                navigator.clipboard.writeText(shareableURL)
-            })
+            <br><a href=${shareableURL} id='shareable-link'>${shareableURL}</a>
+            <img width="20" src="./img/clippy.png" alt="clipboard icon" id="clipboard-icon">
+            <span id="copy-tool-tip">Copied!</span>`
             sharedLinkbar.appendChild(shareableLinkDiv)  
             isShareableLinkDivDisplayed = true;
+            
+            // Enable copy and paste link to users clipboard 
+            copyToolTip = document.querySelector('#copy-tool-tip')
+            clipboardIcon = document.querySelector('#clipboard-icon')
+            console.log(copyToolTip)
+            clipboardIcon.addEventListener('click', function() {
+                navigator.clipboard.writeText(shareableURL)
+                // Flash a tool tip to let user know the content was copied
+                copyToolTip.style.visibility = "visible"
+                setTimeout(function() {
+                    copyToolTip.style.visibility = "hidden"
+                }, 1500)
+            })
         } else {
             const sharedLinkDiv = document.querySelector('.shareable-URL-div')
             sharedLinkDiv.remove()

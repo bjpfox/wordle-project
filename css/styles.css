@@ -158,13 +158,24 @@ h1 {
     border-radius: 3px;
     padding: 5px;
     display: inline-block;
-    width: 250px;
+    width: 260px;
+    text-align: center;
+}
+
+.shareable-URL-div > a {
+    font-size: 10px;
 }
 
 #clipboard-icon {
     position: relative;
     margin-left: 6px;
     top: 4px;
+}
+
+#copy-tool-tip {
+    visibility: hidden;
+    right: 0;
+    padding: 3px;
 }
 
 #close-instructions-icon {
@@ -217,3 +228,4 @@ ul {
     margin-top: 5px;
     margin-bottom: 0px;
 }
+
