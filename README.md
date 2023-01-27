@@ -1,59 +1,77 @@
 # wordle-project
-Project 1 submission for General Assembly Software Engineering Immersive
+Project 1 submission for General Assembly Software Engineering Immersive.
 
 To play the game click here:
 [Wordle-project](https://bjpfox.github.io/wordle-project)
 
+
 ## List of features
 The app has the following features has the same basic game play as [Wordle](https://www.nytimes.com/games/wordle/index.html). I have also added the following additional features: 
 1. Player stats - remembers winning streak, number of wins, number of losses. A toggle button is provided for showing/hiding stats. 
-1. Session storage - remembers player stats, current game state and difficulty level preferences and automatically recovers them when user closes and re-opens page. A reset button is provided to reset player stats if preferred. 
-1. Points based system - awards points when user guesses correctly with spare guesses remaining
-1. Hint system - for the cost of 2 points, the player can get a hint containing a letter which is in the mystery word and which they haven't guessed yet. A maximum of three hints are allowed per game. 
+1. Instructions - displays short instructions explaining the game play and how the other game options word. 
+1. Session storage - remembers player stats, current game state and difficulty level preferences and automatically recovers them when player closes and re-opens page. A reset button is provided to reset player stats if preferred. 
+1. Earn points / request a hint - awards points when player guesses correctly with spare guesses remaining. For the cost of 2 points, the player can get a hint containing a letter which is in the mystery word and which they haven't guessed yet. A maximum of three hints are allowed per game. 
 1. Hard mode - switches game play between an easy word dictionary and a larger dictionary containing more difficult words. 
+1. Challenge a friend - generates a unique shareable URL that can be sent to a friend so that the players friend can try solving the same word as the player. 
 
 
 ## Basic game play 
 1. Page loads with a blank keyboard and blank set of six guess rows. A 'mystery word' is loaded but is not revealed to the player. 
 1. Player takes successes guesses in an attempt to guess the 'mystery word'. Input can be provided by clicking the buttons or pressing keys on keyboard.  
 1. Each time the player submits a guess, the colour keys on the keyboard and guess tiles are updated as follows:
-- Green: letter is in word, and is in the correct position
-- Yellow: letter is in word, but is in a different position
-- Dark grey: letter is not present in word 
-1. Player can keep guessing until they have exhausted all attempts (6). If player runs out of guesses, player is told they have lost and the mystery word is revealed. Player stats (wins, losses, winning streak) are updated and displayed to player.  
+    - Green: letter is in the word, and is in the correct position
+    - Yellow: letter is in the word, but is in a different position
+    - Grey: letter is not present anywhere in word 
+1. Player can keep guessing until they have exhausted all guess attempts (6). If player runs out of guesses, player is told they have lost and the mystery word is revealed. Player stats (wins, losses, winning streak) are updated and displayed to player.  
 1. If player gets word correct, game ends and player is congratulated for winning. Player stats (wins, losses, winning streak) are updated and displayed to the player.   
-1. Once the game has ended the player can launch a new game once game. It is also possible to reset the game part way through.  
-1. A player can request hints for 2 point - see list of features above
-1. A player can toggle between normal mode and hard mode - see list of features above. The change will take place at the start of the next game.  
+1. Once the game has ended the player can launch a new game game. It is also possible to reset a game part way through.  
+1. A player can request hints for 2 point - see list of features above for more information.
+1. A player can toggle between normal mode and hard mode - see list of features above for more information. The change will take place at the start of the next game.  
 
-## Structure of code / approach taken 
+
+## Code structure / approach taken for basic game play 
+The basic game play is covered by the functions described in this section. Further details are provided as comments in the code:
 1. On initial page load, startNewSession() is loaded. This function declares the variables to track game state and player stats, selects key elements from the DOM, adds event listeners, and declares the other functions to be used. 
-2. startNewGame() launches a new game. This involves:
-- Resetting the keyboard and guess tiles
-- Generating a new guess word using getNewWord()
-- Launching getNextGuess() to get the first guess from the player
-3. getNewWord() randomly selectd a word to be used. 
-4.  getNextGuess() moves to the next guess row so that the player can enter their next guess 
-5.  submitGuess() processes the players guess. First it updates the colours of the keys and guess tiles based on the wordle colour code (green/yellow/grey). If entire word is correct it invokes winGame(). If not it invokes getNextGuess() unless there are no more guesses, in which case it invokes loseGame().
-6. winGame() displays the win result and updates the game stats. 
-7. loseGame() displays the lose result and updates the game stats. 
+1. startNewGame() launches a new game. This involves:
+    - Resetting the keyboard and guess tiles
+    - Loading a previous game from storage i.e updating the guess tiles, keys, mystery word, etc to reflect the last game
+    - If nothing is in storage, loading a new guess word using getNewWord() and reseting the answerString 
+1. getNewWord() randomly selects a word from the word array to be used for the current game, and puts it into localStorage. 
+1. addLetter() is used to process a single letter entry (either from a keypress, a click on the keyboard, or from localStorage).  
+Since it receives all keydown events, it also sends backspace and enter keydown events to deleteLetter() and submitGuess().
+1. deleteLetter() deletes the previous letter entered on the guessTile and answerString and updates this in localStorage. 
+1. submitGuess() processes the players guess, either following the player clicking or pressing enter on their keyboard. To avoid duplicating code, it is also used to process guesses loaded from storage. After checking that the word is valid, it then loops through each letter in the mystery word, and checks if the current guess has any matching letters. These matching letters are changed to the appropriate classes (correct = green, somewhere-else = yellow) with any remaining letters set to the not-present class (grey). Once the tiles and keys have been updated, submitGuess checks if the entire word was correct and if so, invokes winGame(). Otherwise, it invokes getNextGuess() unless there are no more guesses, in which case it invokes loseGame().
+1. getNextGuess() moves to the next guess row so that the player can enter their next guess 
+1. winGame() displays the win result, updates the game stats and localStorage. 
+1. loseGame() displays the lose result and updates the game stats and localStorage.  
 
 
-## Approach taken for specific features
-1. Local storage
-1. Hint system
-1. Normal mode / hard mode 
- 
-## Technologies used 
-1. LocalStorage - TODO
-1.  
+## Approach taken and technologies used for additional features
+1. localStorage - remembers player stats, current game state and difficulty level preferences and automatically recovers them when player closes and re-opens page. A reset button is provided to reset player stats if preferred. The stored data is updated whenever any of the data changes. To avoid repeating code, data is loaded using the same submitGuess() function as used during normal game play. I used the [localStorage API](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage) rather than sessionStorage so that the data doesn't expire. 
+1. Earn points / request a hint - points are awarded when player guesses correctly with spare guesses remaining. For the cost of 2 points, the player can get a hint containing a letter which is in the mystery word and which they haven't guessed yet. If the player can't get a hint (because they don't have enough points, or have exceeded the max number of hints, or there are no unguessed letters reamining) they are told the reason why. 
+1. Hard mode - switches game play between an easy word dictionary and a larger dictionary containing more difficult words. The easy word dictionary is based on [previous words from the official wordle game](https://www.rockpapershotgun.com/wordle-past-answers), the hard word dictionary is [the one provided with the project](https://gist.git.generalassemb.ly/kenni/79988cc1cf9554e81954739f664c78d9)
+1. Challenge a friend - generates a unique shareable URL that can be sent to a friend so that the players friend can try solving the same word as the player. To obfuscate the word (so the friend can't figure it out from the URL) I used a simple [base64 encoding](https://developer.mozilla.org/en-US/docs/Web/API/btoa) approach which I read about [here](https://stackoverflow.com/questions/14458819/simplest-way-to-obfuscate-and-deobfuscate-a-string-in-javascript). The [document.URL API](https://developer.mozilla.org/en-US/docs/Web/API/Document/URL) is used extract the encoded string and by decoding this the mystery word can be obtained. A try...catch statement is used in case the encoded string is not valid. I also used the [Clipboard API](https://developer.mozilla.org/en-US/docs/Web/API/Clipboard/writeText) to develop a clipboard feature which enables copying the link to the users system clipboard. 
 
 
 ## Installation instructions  
-The game can be played in any modern web browser and does not require any installation. The game was not specifically developed for mobile devices, but generally works on most mobile devices. To play the game click here:
+The game can be played in any modern web browser and does not require any installation. 
+
+To play the game click here:
 [Wordle-project](https://bjpfox.github.io/wordle-project)
 
-## Future work
-The following ideas were not implemented but could be considered for future versions:
-1. A version of wordle where you can customise your word length and maybe your allowed number of guesses (maybe it makes a suggestion as to how many guesses) - would need a bigger dictionary of words 
-1. Use CSS animations to make the game more fun e.g. when letter changes colour, or when extra points are awarded. 
+
+## Ideas for future extensions 
+The following ideas were not implemented, but could be considered for future versions:
+1. Ability to customise your word length and/or your allowed number of guesses
+1. Use CSS animations to make the game more fun e.g. when letters change colour, or when extra points are awarded. 
+1. Ability for the user to enter their own 5 letter word and generate a shareable link from that word to send to a friend. 
+
+
+## References
+1. https://developer.mozilla.org/en-US/docs/Web/API/Clipboard/writeText
+1. https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage 
+1. https://developer.mozilla.org/en-US/docs/Web/API/Document/URL
+1. https://developer.mozilla.org/en-US/docs/Web/API/btoa
+1. https://stackoverflow.com/questions/14458819/simplest-way-to-obfuscate-and-deobfuscate-a-string-in-javascript 
+1. https://gist.git.generalassemb.ly/kenni/79988cc1cf9554e81954739f664c78d9o1. 
+1. https://www.rockpapershotgun.com/wordle-past-answers
