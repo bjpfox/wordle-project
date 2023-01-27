@@ -7,6 +7,10 @@ header {
     text-align: center;
     font-size: larger;
 }
+
+h1 {
+    margin: 15px;
+}
 .guess-board{
     display: grid;
     grid-template-rows: 1fr 1fr 1fr 1fr 1fr 1fr;
@@ -23,7 +27,7 @@ header {
     display: inline-block;
     text-align: center;
     vertical-align: top;
-    padding-top: 10px;
+    padding-top: 7px;
     font-size: 24px;
 }
 
@@ -63,10 +67,12 @@ header {
 }
 
 .nav-bar {
+    margin: 0px;
     text-align: center;
+
 }
 
-.new-game {
+.new-game-btn {
     background-color: cornflowerblue;
     color: white;
     font-size: medium;
@@ -163,9 +169,10 @@ header {
 
 #close-instructions-icon {
     position: absolute;
-    margin-left: 6px;
+    /* margin-left: 6px; */
     top: 4px;
     right: 4px;
+    padding: 3px;
     background-color: white;
     text-decoration: none;
     color: black;
@@ -174,7 +181,7 @@ header {
 
 #close-instructions-link {
     display: inline-block;
-    font-size: small;
+    font-size: medium;
     text-decoration: none;
     color: cornflowerblue;
     /* position: absolute;
@@ -185,11 +192,28 @@ header {
     /* text-align: center;*/
     position: absolute;
     font-size: medium;
-    top: 100px;
-    width: 300px;
-    height: 500px;
+    top: 80px;
+    width: 335px;
+    /* height: 500px; */
     z-index: 2;
     background-color: #ffeb91;
     border: solid black 1px;
     padding: 10px;
+}
+
+ul {
+    margin: 5px;
+    padding: 5px;
+    padding-top: 0px;
+}
+
+.instructions-container > p {
+    padding: 2px;
+    margin-bottom: 2px;
+}
+
+.instructions-container > p > img {
+    border: solid black 1px;
+    margin-top: 5px;
+    margin-bottom: 0px;
 }

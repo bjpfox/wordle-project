@@ -73,7 +73,8 @@ function startNewSession() {
     document.body.addEventListener('keydown', addLetter) 
     
     // Set up event listener for new game button
-    const newGameButton = document.querySelector('.new-game')
+    const newGameButton = document.querySelector('.new-game-btn')
+    const newGameDiv = document.querySelector('.new-game-div')
     newGameButton.addEventListener('click', newGame)
 
     // Set up event listeners for stored data reset 
@@ -264,7 +265,7 @@ function startNewSession() {
         
         statusBar.innerHTML = `Mystery word: ${mysteryWord}`
         !areStatsDisplayed ? togglePlayerStats() : togglePlayerStats() || togglePlayerStats() //If stats were off, show them (so user can see they have changed), else just toggle twice to update numbers 
-        newGameButton.style.display = 'inline'
+        newGameDiv.style.display = 'inline'
     }
     
     // Displays the win game result and updates player stats accordingly 
@@ -275,7 +276,7 @@ function startNewSession() {
         playerStats.points += (maxGuesses - guessRow);
 
         statusBar.innerHTML = `You WIN!`
-        newGameButton.style.display = 'inline';
+        newGameDiv.style.display = 'inline';
 
         !areStatsDisplayed ? togglePlayerStats() : togglePlayerStats() || togglePlayerStats() //If stats were off, show them (so user can see they have changed), else just toggle twice to update numbers 
                 
@@ -393,7 +394,7 @@ function startNewSession() {
     // Reset game variables and get a new word, or recover last game if there is an unfinished game in storage
     function newGame() {
         isGameInProgress = true;
-        newGameButton.style.display = 'none' 
+        newGameDiv.style.display = 'none' 
         statusBar.innerText = ""
         for (let key of keys) {
             key.classList = ''
@@ -422,10 +423,9 @@ function startNewSession() {
             // console.log(answerStringCache)
             isGameInProgress = true; // Used to allow submit when loading game state from storage 
             answerString = JSON.parse(answerStringCache)
-            // console.log('answerString len: ', answerString.length)
             for (let guess in answerString) {
-                if (answerString[guess].length > 0) {
-                    console.log('Manually submitted guess: ', answerString[guess])
+                if (answerString[guess].length > 0) { // submitGuess() will do further guess validation
+                    console.log('Guess retrieved from localStorage and submitted: ', answerString[guess]) // TODO - for testing only, can be deleted
                     for (let char of answerString[guess]) {
                         storedLetter = char;
                         addLetter();
@@ -439,9 +439,8 @@ function startNewSession() {
                 answerString[guess] = []
             }
         }
-        // TODO - now redundant can delete this 
-        // localStorage.setItem('answerString', JSON.stringify(answerString))
-        // localStorage.setItem('letterCount', letterCount)
+        localStorage.setItem('answerString', JSON.stringify(answerString))
+        localStorage.setItem('letterCount', letterCount)
     }
     
     // Enable players to create a shareable link so they're friends can try solving the same word
@@ -512,17 +511,20 @@ function startNewSession() {
             instructionsDiv.innerHTML = `<h2>How to Play</h2>
             <p> <b>Basic game-play:</b>
             <br>Figure out the mystery word by using the tile colours to improve your guess: 
+            <br><img src="./img/how-to-play.png" alt="Example game">
             <ul>
-            <li>Green tiles: letter appears in word in the same position as the players guess</li>
-            <li>Yellow tile: letter appears in word in a different position from the player guess</li>
-            <li>Dark grey tile: letter does not appear in the word</li>
+            <li><b>Green tile:</b> letter appears in the word in the same position as the players guess.</li>
+            <li><b>Yellow tile:</b> letter appears in the word in a different position from the players guess.</li>
+            <li><b>Grey tile:</b> letter does not appear anywhere in the word.</li>
             </ul>
-            <p><b>Hard-mode / normal mode:</b>
-            <br>Switch to a harder dictionary with more difficult words
-            <p><b>Request a hint:</b>
-            <br>For 2 points, a letter from the mystery word which hasn't yet been guessed is revealed. You can do this a maximum of 3 times, or until you run out of points or letters. 
-            <p>
-            <p><a href='#' id="close-instructions-link">Close Instructions</a>`
+            <p><b>Earn points / request a hint:</b>
+            <ul><li>Receive points for solving the word with unused guess attempts: earn 1 point per unused guess. </li>
+            <li>For 2 points, one of the letters which hasn't been guessed yet is revealed.</li>
+            <li>You can get a maximum of 3 hints per game, or until you run out of points or unguessed letters. </li>
+            </ul>
+            <p><b>Hard-mode:</b>
+            <br>Too easy? Switch to a harder dictionary with less commonly used words.
+            <p><a href='#' id="close-instructions-link">Close Instructions </a>`
             document.querySelector('.guess-board').appendChild(instructionsDiv)  
             document.querySelector('#close-instructions-link').addEventListener('click', toggleInstructions)
             const closeIconDiv = document.createElement('div')
