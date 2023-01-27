@@ -169,11 +169,6 @@ function startNewSession() {
             hintsGiven.push(letterHint)
             !areStatsDisplayed ? togglePlayerStats() : togglePlayerStats() || togglePlayerStats() // If stats were off, show them (so user can see they have changed), else just toggle twice to update numbers 
         }
-
-        // if ((possibleHintLetters.length > 0) && (playerStats.points >= 2) && (hintsGiven.length < 3)) {
-        // } else {
-        //     statusBar.innerText = `Sorry, we cannot give any more hints.`; 
-        // }
     }
     
     // Deletes the last letter entered
@@ -496,12 +491,15 @@ function startNewSession() {
             clipboardIcon = document.querySelector('#clipboard-icon')
             console.log(copyToolTip)
             clipboardIcon.addEventListener('click', function() {
-                navigator.clipboard.writeText(shareableURL)
-                // Flash a tool tip to let user know the content was copied
-                copyToolTip.style.visibility = "visible"
-                setTimeout(function() {
-                    copyToolTip.style.visibility = "hidden"
-                }, 1500)
+                navigator.clipboard.writeText(shareableURL).then(
+                    function() {
+                        // Flash a tool tip to let user know the link was succesfully copied
+                        copyToolTip.style.visibility = "visible"
+                        setTimeout(function() {
+                            copyToolTip.style.visibility = "hidden"
+                        }, 1500)
+                    } 
+                )
             })
         } else {
             const sharedLinkDiv = document.querySelector('.shareable-URL-div')
