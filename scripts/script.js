@@ -418,6 +418,11 @@ function startNewSession() {
         // Get the mystery word from local storage. If it doesnt exist, get a new word (mystery word is removed from storage after each game so if it exists that means a game was in progress)
         mysteryWord = localStorage.getItem('mysteryWord');
         (mysteryWord === null) && getNewWord()
+        
+        // Toggle sharedWord link so its based on the latest word 
+        createShareableLink() 
+        createShareableLink() 
+        
        
         // If answerString exists, a game was in progress so retrieve it from storage, and submit the previous answers. Else empty it. 
         answerStringCache = localStorage.getItem('answerString'); 
