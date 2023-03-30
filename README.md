@@ -1,5 +1,5 @@
 # wordle-project
-Project 1 submission for General Assembly Software Engineering Immersive.
+Project 1 for General Assembly Software Engineering Immersive.
 
 To play the game click here:
 [Wordle-project](https://bjpfox.github.io/wordle-project)
